@@ -51,7 +51,7 @@ def index():
 @app.route('/dashboard')
 def dashboard():
     """Render the dashboard page."""
-    return render_template('dashboard.html')
+    return render_template('grafana_dashboard.html')
 
 @app.route('/api/memory/current')
 def get_current_memory():

@@ -1,0 +1,1501 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-0">Memory Management Dashboard</h2>
+                        <p class="text-muted mb-0">Self-Healing Memory System</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span id="lastUpdated" class="badge bg-secondary me-2">Last updated: Never</span>
+                        <div class="btn-group">
+                            <button id="refreshBtn" class="btn btn-sm btn-primary">
+                                <i class="fas fa-sync-alt me-1"></i>Refresh
+                            </button>
+                            <button id="autoRefreshBtn" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-clock me-1"></i>Auto
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Memory Overview Row -->
+    <div class="row mb-4">
+        <!-- Main Memory Usage Panel -->
+        <div class="col-md-3 mb-4">
+            <div class="card bg-dark border-secondary h-100">
+                <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Memory Usage</h5>
+                    <span class="badge bg-primary text-white">Current</span>
+                </div>
+                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                    <div class="gauge-container mb-3">
+                        <canvas id="memoryGauge" width="200" height="200"></canvas>
+                        <div class="gauge-value-container">
+                            <span id="memoryUsageText" class="display-4">0%</span>
+                        </div>
+                    </div>
+                    <div class="memory-stats">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Used:</span>
+                            <span id="usedMemory" class="text-white">0 GB</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Free:</span>
+                            <span id="freeMemory" class="text-white">0 GB</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Total:</span>
+                            <span id="totalMemory" class="text-white">0 GB</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Memory Metrics Panel -->
+        <div class="col-md-3 mb-4">
+            <div class="card bg-dark border-secondary h-100">
+                <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Memory Metrics</h5>
+                    <span class="badge bg-info text-white">Details</span>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush bg-transparent">
+                        <li class="list-group-item bg-transparent border-secondary d-flex justify-content-between">
+                            <span>Memory Load:</span>
+                            <span id="memoryLoad" class="badge bg-primary">0%</span>
+                        </li>
+                        <li class="list-group-item bg-transparent border-secondary d-flex justify-content-between">
+                            <span>Available Memory:</span>
+                            <span id="availableMemory">0 GB</span>
+                        </li>
+                        <li class="list-group-item bg-transparent border-secondary d-flex justify-content-between">
+                            <span>Cached Memory:</span>
+                            <span id="cachedMemory">0 GB</span>
+                        </li>
+                        <li class="list-group-item bg-transparent border-secondary d-flex justify-content-between">
+                            <span>Buffers:</span>
+                            <span id="buffers">0 GB</span>
+                        </li>
+                        <li class="list-group-item bg-transparent border-secondary d-flex justify-content-between">
+                            <span>Swap Used:</span>
+                            <span id="swapUsed">0 GB</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Status Panel -->
+        <div class="col-md-3 mb-4">
+            <div class="card bg-dark border-secondary h-100">
+                <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Memory Analysis</h5>
+                    <span class="badge bg-warning text-dark">Status</span>
+                </div>
+                <div class="card-body text-center">
+                    <div id="healthStatusContainer" class="mb-3">
+                        <i id="statusIcon" class="fas fa-check-circle fa-4x text-success"></i>
+                        <h3 id="statusText" class="mt-3">Healthy</h3>
+                    </div>
+                    <div id="statusDetails" class="alert alert-success">
+                        Memory is operating within normal parameters.
+                    </div>
+                    <button id="analyzeBtn" class="btn btn-primary w-100 mt-3">
+                        <i class="fas fa-search me-1"></i>Analyze Memory
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prediction Panel -->
+        <div class="col-md-3 mb-4">
+            <div class="card bg-dark border-secondary h-100">
+                <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Prediction</h5>
+                    <span class="badge bg-danger text-white">Forecast</span>
+                </div>
+                <div class="card-body text-center">
+                    <div id="predictionContainer" class="mb-3">
+                        <i id="predictionIcon" class="fas fa-chart-line fa-4x text-info"></i>
+                        <h3 id="predictionText" class="mt-3">No Prediction</h3>
+                    </div>
+                    <div id="predictionDetails" class="alert alert-info">
+                        Generate a prediction to forecast future memory usage.
+                    </div>
+                    <button id="predictBtn" class="btn btn-info w-100 mt-3">
+                        <i class="fas fa-chart-line me-1"></i>Generate Prediction
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Memory Usage History -->
+        <div class="col-md-6 mb-4">
+            <div class="card bg-dark border-secondary h-100">
+                <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Memory Usage History</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-secondary time-range-btn active" data-range="1h">1h</button>
+                        <button class="btn btn-sm btn-outline-secondary time-range-btn" data-range="3h">3h</button>
+                        <button class="btn btn-sm btn-outline-secondary time-range-btn" data-range="6h">6h</button>
+                        <button class="btn btn-sm btn-outline-secondary time-range-btn" data-range="12h">12h</button>
+                        <button class="btn btn-sm btn-outline-secondary time-range-btn" data-range="24h">24h</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="memoryHistoryChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Memory Utilization Chart -->
+        <div class="col-md-6 mb-4">
+            <div class="card bg-dark border-secondary h-100">
+                <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Memory Utilization Breakdown</h5>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            Options
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton">
+                            <li><a class="dropdown-item chart-type-option" href="#" data-type="pie">Pie Chart</a></li>
+                            <li><a class="dropdown-item chart-type-option" href="#" data-type="doughnut">Doughnut Chart</a></li>
+                            <li><a class="dropdown-item chart-type-option" href="#" data-type="bar">Bar Chart</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="memoryBreakdownChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Actions Row -->
+    <div class="row mb-4">
+        <!-- Healing Agent -->
+        <div class="col-md-6 mb-4">
+            <div class="card bg-dark border-secondary h-100">
+                <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Healing Agent</h5>
+                    <span class="badge bg-success text-white">Actions</span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-heartbeat fa-4x text-success mb-3"></i>
+                            <h5 id="healingStatus">Ready</h5>
+                        </div>
+                        <div class="col-md-8">
+                            <div id="healingPlanContainer" class="alert alert-dark">
+                                <div id="healingPlanContent">No healing plan available. Generate a plan to see recommendations.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <button id="planHealBtn" class="btn btn-outline-success w-100">
+                                <i class="fas fa-list-check me-1"></i>Generate Plan
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <button id="executeHealBtn" class="btn btn-success w-100">
+                                <i class="fas fa-wrench me-1"></i>Execute Healing
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Testing Tools -->
+        <div class="col-md-6 mb-4">
+            <div class="card bg-dark border-secondary h-100">
+                <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Testing Tools</h5>
+                    <span class="badge bg-danger text-white">Simulation</span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card bg-dark border-danger mb-3">
+                                <div class="card-header bg-transparent border-danger">
+                                    <h6 class="mb-0">Memory Usage Simulator</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group mb-3">
+                                        <label for="memoryUsage" class="form-label">Memory Usage (MB)</label>
+                                        <input type="range" class="form-range" id="memoryUsage" min="10" max="500" value="100">
+                                        <div class="d-flex justify-content-between">
+                                            <small>10 MB</small>
+                                            <small id="memoryUsageValue">100 MB</small>
+                                            <small>500 MB</small>
+                                        </div>
+                                    </div>
+                                    <button id="simulateBtn" class="btn btn-danger w-100">
+                                        <i class="fas fa-fire me-1"></i>Simulate Usage
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-dark border-warning mb-3">
+                                <div class="card-header bg-transparent border-warning">
+                                    <h6 class="mb-0">Memory Leak Simulator</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group mb-3">
+                                        <label for="leakRate" class="form-label">Leak Rate (MB/min)</label>
+                                        <input type="range" class="form-range" id="leakRate" min="1" max="50" value="5">
+                                        <div class="d-flex justify-content-between">
+                                            <small>1 MB/min</small>
+                                            <small id="leakRateValue">5 MB/min</small>
+                                            <small>50 MB/min</small>
+                                        </div>
+                                    </div>
+                                    <div class="d-grid gap-2">
+                                        <button id="startLeakBtn" class="btn btn-warning w-100">
+                                            <i class="fas fa-play me-1"></i>Start Leak
+                                        </button>
+                                        <button id="stopLeakBtn" class="btn btn-outline-warning w-100" disabled>
+                                            <i class="fas fa-stop me-1"></i>Stop Leak
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Logs Row -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Event Logs</h5>
+                    <div class="btn-group" role="group">
+                        <button id="memoryLogsBtn" class="btn btn-sm btn-primary active">Memory Events</button>
+                        <button id="predictionLogsBtn" class="btn btn-sm btn-info">Predictions</button>
+                        <button id="healingLogsBtn" class="btn btn-sm btn-success">Healing Events</button>
+                        <button id="allLogsBtn" class="btn btn-sm btn-secondary">All Events</button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div id="logsContainer" class="log-container" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-dark table-hover mb-0">
+                            <thead class="sticky-top bg-dark">
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logsContent">
+                                <tr>
+                                    <td colspan="4" class="text-center py-5">
+                                        <div class="spinner-border text-secondary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-3">Loading logs...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <span id="logStats" class="text-muted">Showing 0 of 0 log entries</span>
+                    <button id="loadMoreLogsBtn" class="btn btn-sm btn-outline-secondary">Load More</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Memory Analysis Modal -->
+<div class="modal fade" id="analysisModal" tabindex="-1" aria-labelledby="analysisModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark border-primary">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="analysisModalLabel">
+                    <i class="fas fa-search me-2"></i>Memory Analysis Results
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-dark border-secondary mb-3">
+                            <div class="card-header bg-transparent">Current Memory Status</div>
+                            <div class="card-body">
+                                <div class="progress mb-3" style="height: 25px;">
+                                    <div id="analysisMemoryBar" class="progress-bar" role="progressbar" style="width: 0%;">0%</div>
+                                </div>
+                                <ul class="list-group list-group-flush bg-transparent">
+                                    <li class="list-group-item bg-transparent d-flex justify-content-between">
+                                        <span>Total Memory:</span>
+                                        <span id="analysisTotalMemory">0 GB</span>
+                                    </li>
+                                    <li class="list-group-item bg-transparent d-flex justify-content-between">
+                                        <span>Used Memory:</span>
+                                        <span id="analysisUsedMemory">0 GB</span>
+                                    </li>
+                                    <li class="list-group-item bg-transparent d-flex justify-content-between">
+                                        <span>Free Memory:</span>
+                                        <span id="analysisFreeMemory">0 GB</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div id="analysisResultCard" class="card bg-dark mb-3">
+                            <div class="card-header bg-transparent">Analysis Results</div>
+                            <div class="card-body">
+                                <div id="analysisResult">
+                                    <div class="text-center py-3">
+                                        <div class="spinner-border text-secondary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-3">Analyzing memory...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="analysisRecommendations" class="mt-3">
+                    <!-- Recommendations will be inserted here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="generateHealingPlanBtn">
+                    <i class="fas fa-wrench me-1"></i>Generate Healing Plan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Healing Plan Modal -->
+<div class="modal fade" id="healingModal" tabindex="-1" aria-labelledby="healingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark border-success">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="healingModalLabel">
+                    <i class="fas fa-heartbeat me-2"></i>Memory Healing Plan
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="healingPlanModalContent">
+                    <div class="text-center py-3">
+                        <div class="spinner-border text-secondary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3">Generating healing plan...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="executeHealingModalBtn">
+                    <i class="fas fa-wrench me-1"></i>Execute Healing Plan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Healing Results Modal -->
+<div class="modal fade" id="healingResultsModal" tabindex="-1" aria-labelledby="healingResultsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark border-info">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="healingResultsModalLabel">
+                    <i class="fas fa-chart-line me-2"></i>Healing Results
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card bg-dark border-secondary">
+                            <div class="card-header bg-transparent">Before Healing</div>
+                            <div class="card-body">
+                                <div class="progress mb-3" style="height: 25px;">
+                                    <div id="beforeHealingBar" class="progress-bar bg-danger" role="progressbar" style="width: 0%;">0%</div>
+                                </div>
+                                <div id="beforeHealingDetails" class="small">
+                                    <div class="placeholder-glow">
+                                        <span class="placeholder col-12"></span>
+                                        <span class="placeholder col-10"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-dark border-secondary">
+                            <div class="card-header bg-transparent">After Healing</div>
+                            <div class="card-body">
+                                <div class="progress mb-3" style="height: 25px;">
+                                    <div id="afterHealingBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;">0%</div>
+                                </div>
+                                <div id="afterHealingDetails" class="small">
+                                    <div class="placeholder-glow">
+                                        <span class="placeholder col-12"></span>
+                                        <span class="placeholder col-10"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card bg-dark border-secondary">
+                            <div class="card-header bg-transparent">Actions Executed</div>
+                            <div class="card-body">
+                                <div id="healingActionsList" class="list-group list-group-flush bg-transparent">
+                                    <div class="placeholder-glow">
+                                        <span class="placeholder col-12"></span>
+                                        <span class="placeholder col-12"></span>
+                                        <span class="placeholder col-8"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize gauge chart for memory usage
+    const gaugeCtx = document.getElementById('memoryGauge').getContext('2d');
+    const memoryGauge = new Chart(gaugeCtx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [0, 100],
+                backgroundColor: [
+                    getBackgroundColor(0),
+                    'rgba(54, 54, 54, 0.2)'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            cutout: '80%',
+            rotation: -90,
+            circumference: 180,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: false
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Initialize memory history chart
+    const historyCtx = document.getElementById('memoryHistoryChart').getContext('2d');
+    const memoryHistoryChart = new Chart(historyCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Memory Usage (%)',
+                data: [],
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#aaa'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#aaa'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#fff'
+                    }
+                }
+            },
+            interaction: {
+                mode: 'index',
+                intersect: false
+            }
+        }
+    });
+
+    // Initialize memory breakdown chart
+    const breakdownCtx = document.getElementById('memoryBreakdownChart').getContext('2d');
+    const memoryBreakdownChart = new Chart(breakdownCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Used', 'Free', 'Cached', 'Buffers'],
+            datasets: [{
+                data: [0, 0, 0, 0],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(75, 192, 192, 0.8)',
+                    'rgba(255, 159, 64, 0.8)',
+                    'rgba(153, 102, 255, 0.8)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        color: '#fff'
+                    }
+                }
+            }
+        }
+    });
+
+    // Function to get color based on memory usage
+    function getBackgroundColor(usagePercent) {
+        if (usagePercent <= 60) {
+            return 'rgba(75, 192, 192, 0.8)'; // Green
+        } else if (usagePercent <= 80) {
+            return 'rgba(255, 159, 64, 0.8)'; // Orange
+        } else {
+            return 'rgba(255, 99, 132, 0.8)'; // Red
+        }
+    }
+
+    // Function to update memory gauge
+    function updateMemoryGauge(usagePercent) {
+        memoryGauge.data.datasets[0].data[0] = usagePercent;
+        memoryGauge.data.datasets[0].data[1] = 100 - usagePercent;
+        memoryGauge.data.datasets[0].backgroundColor[0] = getBackgroundColor(usagePercent);
+        memoryGauge.update();
+    }
+
+    // Function to update the memory breakdown chart
+    function updateMemoryBreakdown(usedPercent, freePercent, cachedPercent, buffersPercent) {
+        memoryBreakdownChart.data.datasets[0].data = [
+            usedPercent, freePercent, cachedPercent, buffersPercent
+        ];
+        memoryBreakdownChart.update();
+    }
+
+    // Function to add data to memory history chart
+    function addMemoryHistoryData(timestamp, usagePercent) {
+        const MAX_DATA_POINTS = 50; // Maximum number of points to show
+
+        // Add the new data point
+        memoryHistoryChart.data.labels.push(timestamp);
+        memoryHistoryChart.data.datasets[0].data.push(usagePercent);
+
+        // Remove old data points if we have too many
+        if (memoryHistoryChart.data.labels.length > MAX_DATA_POINTS) {
+            memoryHistoryChart.data.labels.shift();
+            memoryHistoryChart.data.datasets[0].data.shift();
+        }
+
+        memoryHistoryChart.update();
+    }
+
+    // Function to format bytes into human-readable format
+    function formatBytes(bytes, decimals = 2) {
+        if (bytes === 0) return '0 B';
+
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    // Function to update all memory stats displays
+    function updateMemoryStats(stats) {
+        // Update gauge and text
+        const usagePercent = stats.used_percent || 0;
+        updateMemoryGauge(usagePercent);
+        document.getElementById('memoryUsageText').textContent = `${usagePercent.toFixed(1)}%`;
+
+        // Update basic memory stats
+        document.getElementById('usedMemory').textContent = formatBytes(stats.used || 0);
+        document.getElementById('freeMemory').textContent = formatBytes(stats.free || 0);
+        document.getElementById('totalMemory').textContent = formatBytes(stats.total || 0);
+
+        // Update detailed memory metrics
+        document.getElementById('memoryLoad').textContent = `${usagePercent.toFixed(1)}%`;
+        document.getElementById('availableMemory').textContent = formatBytes(stats.available || 0);
+        document.getElementById('cachedMemory').textContent = formatBytes(stats.cached || 0);
+        document.getElementById('buffers').textContent = formatBytes(stats.buffers || 0);
+        document.getElementById('swapUsed').textContent = formatBytes(stats.swap_used || 0);
+
+        // Update breakdown chart
+        const freePercent = (stats.free / stats.total * 100) || 0;
+        const cachedPercent = (stats.cached / stats.total * 100) || 0;
+        const buffersPercent = (stats.buffers / stats.total * 100) || 0;
+        const usedAdjustedPercent = usagePercent - cachedPercent - buffersPercent;
+        
+        updateMemoryBreakdown(
+            usedAdjustedPercent > 0 ? usedAdjustedPercent : usagePercent,
+            freePercent,
+            cachedPercent,
+            buffersPercent
+        );
+
+        // Add to history chart
+        const now = new Date();
+        const timestamp = now.toLocaleTimeString();
+        addMemoryHistoryData(timestamp, usagePercent);
+
+        // Update last updated timestamp
+        document.getElementById('lastUpdated').textContent = `Last updated: ${now.toLocaleString()}`;
+    }
+
+    // Function to fetch current memory statistics
+    function fetchMemoryStats() {
+        fetch('/api/memory/current')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateMemoryStats(data.data);
+                } else {
+                    console.error('Error fetching memory stats:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching memory stats:', error);
+            });
+    }
+
+    // Function to analyze memory
+    function analyzeMemory() {
+        document.getElementById('statusIcon').className = 'fas fa-spinner fa-spin fa-4x text-info';
+        document.getElementById('statusText').textContent = 'Analyzing...';
+        document.getElementById('statusDetails').className = 'alert alert-info';
+        document.getElementById('statusDetails').textContent = 'Analyzing memory conditions...';
+
+        fetch('/api/memory/analyze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const analysis = data.analysis;
+                const anomalyDetected = analysis.anomaly_detected || false;
+                const severity = analysis.severity || 'normal';
+                
+                // Update status display
+                if (anomalyDetected) {
+                    document.getElementById('statusIcon').className = 'fas fa-exclamation-triangle fa-4x text-danger';
+                    document.getElementById('statusText').textContent = `Anomaly Detected (${severity})`;
+                    document.getElementById('statusDetails').className = 'alert alert-danger';
+                    document.getElementById('statusDetails').textContent = analysis.anomaly_description || 'Memory anomaly detected.';
+                } else {
+                    document.getElementById('statusIcon').className = 'fas fa-check-circle fa-4x text-success';
+                    document.getElementById('statusText').textContent = 'Healthy';
+                    document.getElementById('statusDetails').className = 'alert alert-success';
+                    document.getElementById('statusDetails').textContent = 'Memory is operating within normal parameters.';
+                }
+                
+                // Update analysis modal if open
+                updateAnalysisModal(data.stats, analysis);
+            } else {
+                document.getElementById('statusIcon').className = 'fas fa-times-circle fa-4x text-danger';
+                document.getElementById('statusText').textContent = 'Analysis Failed';
+                document.getElementById('statusDetails').className = 'alert alert-danger';
+                document.getElementById('statusDetails').textContent = data.error || 'Failed to analyze memory.';
+            }
+        })
+        .catch(error => {
+            console.error('Error analyzing memory:', error);
+            document.getElementById('statusIcon').className = 'fas fa-times-circle fa-4x text-danger';
+            document.getElementById('statusText').textContent = 'Analysis Error';
+            document.getElementById('statusDetails').className = 'alert alert-danger';
+            document.getElementById('statusDetails').textContent = 'An error occurred during analysis.';
+        });
+    }
+
+    // Function to update analysis modal content
+    function updateAnalysisModal(stats, analysis) {
+        const usagePercent = stats.used_percent || 0;
+        
+        // Update memory stats in modal
+        document.getElementById('analysisMemoryBar').style.width = `${usagePercent}%`;
+        document.getElementById('analysisMemoryBar').textContent = `${usagePercent.toFixed(1)}%`;
+        document.getElementById('analysisMemoryBar').className = `progress-bar ${usagePercent > 80 ? 'bg-danger' : usagePercent > 60 ? 'bg-warning' : 'bg-success'}`;
+        
+        document.getElementById('analysisTotalMemory').textContent = formatBytes(stats.total || 0);
+        document.getElementById('analysisUsedMemory').textContent = formatBytes(stats.used || 0);
+        document.getElementById('analysisFreeMemory').textContent = formatBytes(stats.free || 0);
+        
+        // Update analysis results
+        const anomalyDetected = analysis.anomaly_detected || false;
+        const resultCard = document.getElementById('analysisResultCard');
+        const resultContent = document.getElementById('analysisResult');
+        
+        if (anomalyDetected) {
+            resultCard.className = 'card bg-dark border-danger mb-3';
+            resultContent.innerHTML = `
+                <div class="alert alert-danger mb-0">
+                    <h5 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Anomaly Detected</h5>
+                    <p><strong>Severity:</strong> ${analysis.severity || 'Unknown'}</p>
+                    <hr>
+                    <p class="mb-0">${analysis.anomaly_description || 'Memory anomaly detected.'}</p>
+                </div>
+            `;
+            
+            // Add recommendations
+            document.getElementById('analysisRecommendations').innerHTML = `
+                <div class="card bg-dark border-warning">
+                    <div class="card-header bg-transparent border-warning">Recommendations</div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush bg-transparent">
+                            ${analysis.recommendations ? analysis.recommendations.map(rec => `
+                                <li class="list-group-item bg-transparent d-flex align-items-center">
+                                    <i class="fas fa-lightbulb text-warning me-2"></i> ${rec}
+                                </li>
+                            `).join('') : '<li class="list-group-item bg-transparent">No specific recommendations available.</li>'}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        } else {
+            resultCard.className = 'card bg-dark border-success mb-3';
+            resultContent.innerHTML = `
+                <div class="alert alert-success mb-0">
+                    <h5 class="alert-heading"><i class="fas fa-check-circle me-2"></i>Memory Status Normal</h5>
+                    <p>Memory is operating within normal parameters.</p>
+                    <hr>
+                    <p class="mb-0">No anomalies were detected in the current memory conditions.</p>
+                </div>
+            `;
+            
+            // Clear recommendations
+            document.getElementById('analysisRecommendations').innerHTML = '';
+        }
+    }
+
+    // Function to generate memory prediction
+    function generatePrediction() {
+        document.getElementById('predictionIcon').className = 'fas fa-spinner fa-spin fa-4x text-info';
+        document.getElementById('predictionText').textContent = 'Predicting...';
+        document.getElementById('predictionDetails').className = 'alert alert-info';
+        document.getElementById('predictionDetails').textContent = 'Generating memory usage prediction...';
+        
+        fetch('/api/memory/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const prediction = data.prediction;
+                const predictedUsage1h = prediction.predicted_memory_usage_1h || 0;
+                const hasPredictedIssues = prediction.predicted_issues && prediction.predicted_issues.length > 0;
+                
+                // Update prediction display
+                if (hasPredictedIssues) {
+                    document.getElementById('predictionIcon').className = 'fas fa-exclamation-circle fa-4x text-danger';
+                    document.getElementById('predictionText').textContent = `${predictedUsage1h.toFixed(1)}% in 1h`;
+                    document.getElementById('predictionDetails').className = 'alert alert-danger';
+                    const issue = prediction.predicted_issues[0];
+                    document.getElementById('predictionDetails').innerHTML = `<strong>Warning:</strong> ${issue.description || 'Potential memory issue detected.'}<br><small>Probability: ${(issue.probability * 100).toFixed(1)}%</small>`;
+                } else {
+                    document.getElementById('predictionIcon').className = 'fas fa-chart-line fa-4x text-success';
+                    document.getElementById('predictionText').textContent = `${predictedUsage1h.toFixed(1)}% in 1h`;
+                    document.getElementById('predictionDetails').className = 'alert alert-success';
+                    document.getElementById('predictionDetails').textContent = 'No memory issues predicted in the next hour.';
+                }
+            } else {
+                document.getElementById('predictionIcon').className = 'fas fa-times-circle fa-4x text-danger';
+                document.getElementById('predictionText').textContent = 'Prediction Failed';
+                document.getElementById('predictionDetails').className = 'alert alert-danger';
+                document.getElementById('predictionDetails').textContent = data.error || 'Failed to generate prediction.';
+            }
+        })
+        .catch(error => {
+            console.error('Error generating prediction:', error);
+            document.getElementById('predictionIcon').className = 'fas fa-times-circle fa-4x text-danger';
+            document.getElementById('predictionText').textContent = 'Prediction Error';
+            document.getElementById('predictionDetails').className = 'alert alert-danger';
+            document.getElementById('predictionDetails').textContent = 'An error occurred during prediction.';
+        });
+    }
+
+    // Function to generate healing plan
+    function generateHealingPlan() {
+        document.getElementById('healingStatus').textContent = 'Generating plan...';
+        document.getElementById('healingPlanContent').innerHTML = `
+            <div class="text-center py-3">
+                <div class="spinner-border text-secondary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Generating healing plan...</p>
+            </div>
+        `;
+        
+        fetch('/api/memory/heal', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                execute: false
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const healingPlan = data.healing_plan;
+                const hasActions = healingPlan && healingPlan.actions && healingPlan.actions.length > 0;
+                
+                // Update healing plan display
+                if (hasActions) {
+                    document.getElementById('healingStatus').textContent = 'Plan Ready';
+                    
+                    let actionsHtml = '<ul class="list-group list-group-flush bg-transparent">';
+                    healingPlan.actions.forEach(action => {
+                        const priorityBadge = action.priority === 'high' 
+                            ? '<span class="badge bg-danger ms-2">High Priority</span>' 
+                            : (action.priority === 'medium' ? '<span class="badge bg-warning ms-2">Medium Priority</span>' : '');
+                            
+                        actionsHtml += `
+                            <li class="list-group-item bg-transparent">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>${action.description || action.action_type}</span>
+                                    ${priorityBadge}
+                                </div>
+                            </li>
+                        `;
+                    });
+                    actionsHtml += '</ul>';
+                    
+                    document.getElementById('healingPlanContent').innerHTML = actionsHtml;
+                    
+                    // Update modal content if open
+                    updateHealingPlanModal(healingPlan);
+                } else {
+                    document.getElementById('healingStatus').textContent = 'No Actions Needed';
+                    document.getElementById('healingPlanContent').innerHTML = `
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle me-2"></i>No healing actions required at this time.
+                        </div>
+                    `;
+                    
+                    // Update modal content if open
+                    document.getElementById('healingPlanModalContent').innerHTML = `
+                        <div class="alert alert-info">
+                            <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i>No Actions Required</h5>
+                            <p>The system has determined that no healing actions are required at this time.</p>
+                            <hr>
+                            <p class="mb-0">Memory conditions are within acceptable parameters.</p>
+                        </div>
+                    `;
+                }
+            } else {
+                document.getElementById('healingStatus').textContent = 'Plan Failed';
+                document.getElementById('healingPlanContent').innerHTML = `
+                    <div class="alert alert-danger mb-0">
+                        <i class="fas fa-times-circle me-2"></i>${data.error || 'Failed to generate healing plan.'}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error generating healing plan:', error);
+            document.getElementById('healingStatus').textContent = 'Error';
+            document.getElementById('healingPlanContent').innerHTML = `
+                <div class="alert alert-danger mb-0">
+                    <i class="fas fa-times-circle me-2"></i>An error occurred while generating the healing plan.
+                </div>
+            `;
+        });
+    }
+
+    // Function to update healing plan modal
+    function updateHealingPlanModal(healingPlan) {
+        const modalContent = document.getElementById('healingPlanModalContent');
+        const hasActions = healingPlan && healingPlan.actions && healingPlan.actions.length > 0;
+        
+        if (hasActions) {
+            let html = `
+                <div class="alert alert-${healingPlan.severity === 'high' ? 'danger' : healingPlan.severity === 'medium' ? 'warning' : 'info'} mb-3">
+                    <h5 class="alert-heading"><i class="fas fa-${healingPlan.severity === 'high' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>Healing Plan Generated</h5>
+                    <p>${healingPlan.description || 'A healing plan has been generated to address memory issues.'}</p>
+                </div>
+                
+                <div class="card bg-dark border-secondary mb-3">
+                    <div class="card-header bg-transparent">Recommended Actions</div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush bg-transparent">
+            `;
+            
+            healingPlan.actions.forEach(action => {
+                const priorityBadge = action.priority === 'high' 
+                    ? '<span class="badge bg-danger ms-2">High Priority</span>' 
+                    : (action.priority === 'medium' ? '<span class="badge bg-warning ms-2">Medium Priority</span>' : 
+                        '<span class="badge bg-info ms-2">Low Priority</span>');
+                    
+                html += `
+                    <li class="list-group-item bg-transparent">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>${action.action_type}</strong>
+                                <p class="mb-0 text-muted small">${action.description || ''}</p>
+                            </div>
+                            ${priorityBadge}
+                        </div>
+                    </li>
+                `;
+            });
+            
+            html += `
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="alert alert-secondary">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Click "Execute Healing Plan" to apply these actions to resolve memory issues.
+                    </small>
+                </div>
+            `;
+            
+            modalContent.innerHTML = html;
+        } else {
+            modalContent.innerHTML = `
+                <div class="alert alert-info">
+                    <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i>No Actions Required</h5>
+                    <p>The system has determined that no healing actions are required at this time.</p>
+                    <hr>
+                    <p class="mb-0">Memory conditions are within acceptable parameters.</p>
+                </div>
+            `;
+        }
+    }
+
+    // Function to execute healing plan
+    function executeHealing() {
+        document.getElementById('healingStatus').textContent = 'Executing...';
+        
+        fetch('/api/memory/heal', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                execute: true
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const results = data.results;
+                const validation = data.validation;
+                const executed = data.executed;
+                
+                if (executed && results) {
+                    const effective = validation && validation.effective;
+                    
+                    document.getElementById('healingStatus').textContent = effective ? 'Successfully Healed' : 'Healing Completed';
+                    
+                    // Show results modal
+                    showHealingResults(data.stats, data.healing_plan, results, validation);
+                    
+                    // Refresh memory stats
+                    fetchMemoryStats();
+                } else {
+                    document.getElementById('healingStatus').textContent = 'No Actions Executed';
+                }
+            } else {
+                document.getElementById('healingStatus').textContent = 'Execution Failed';
+                alert('Failed to execute healing: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error executing healing:', error);
+            document.getElementById('healingStatus').textContent = 'Execution Error';
+            alert('An error occurred during healing: ' + error.message);
+        });
+    }
+
+    // Function to show healing results
+    function showHealingResults(stats, healingPlan, results, validation) {
+        const beforeUsagePercent = stats.used_percent || 0;
+        const afterUsagePercent = beforeUsagePercent - (results.memory_change ? results.memory_change.difference : 0);
+        
+        // Update before/after bars
+        document.getElementById('beforeHealingBar').style.width = `${beforeUsagePercent}%`;
+        document.getElementById('beforeHealingBar').textContent = `${beforeUsagePercent.toFixed(1)}%`;
+        
+        document.getElementById('afterHealingBar').style.width = `${afterUsagePercent}%`;
+        document.getElementById('afterHealingBar').textContent = `${afterUsagePercent.toFixed(1)}%`;
+        
+        // Update details
+        document.getElementById('beforeHealingDetails').innerHTML = `
+            <strong>Total Memory:</strong> ${formatBytes(stats.total || 0)}<br>
+            <strong>Used Memory:</strong> ${formatBytes(stats.used || 0)}<br>
+            <strong>Free Memory:</strong> ${formatBytes(stats.free || 0)}<br>
+        `;
+        
+        const freedMemory = results.memory_change ? results.memory_change.bytes_freed : 0;
+        document.getElementById('afterHealingDetails').innerHTML = `
+            <strong>Total Memory:</strong> ${formatBytes(stats.total || 0)}<br>
+            <strong>Used Memory:</strong> ${formatBytes((stats.used || 0) - freedMemory)}<br>
+            <strong>Free Memory:</strong> ${formatBytes((stats.free || 0) + freedMemory)}<br>
+            <strong>Memory Freed:</strong> ${formatBytes(freedMemory)}<br>
+        `;
+        
+        // Update actions list
+        let actionsHtml = '';
+        if (healingPlan && healingPlan.actions) {
+            healingPlan.actions.forEach(action => {
+                const actionResult = results.action_results ? results.action_results.find(r => r.action_id === action.id) : null;
+                const successful = actionResult ? actionResult.success : false;
+                
+                actionsHtml += `
+                    <div class="list-group-item bg-transparent d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${action.action_type}</strong>
+                            <p class="mb-0 text-muted small">${action.description || ''}</p>
+                        </div>
+                        <span class="badge ${successful ? 'bg-success' : 'bg-danger'}">${successful ? 'Success' : 'Failed'}</span>
+                    </div>
+                `;
+            });
+        }
+        document.getElementById('healingActionsList').innerHTML = actionsHtml || '<p class="text-center my-3">No actions were executed.</p>';
+        
+        // Show the modal
+        const healingResultsModal = new bootstrap.Modal(document.getElementById('healingResultsModal'));
+        healingResultsModal.show();
+    }
+
+    // Function to simulate memory usage
+    function simulateMemoryUsage() {
+        const usageMB = document.getElementById('memoryUsage').value;
+        document.getElementById('simulateBtn').disabled = true;
+        document.getElementById('simulateBtn').innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Simulating...';
+        
+        fetch('/api/memory/simulate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                usage_mb: parseInt(usageMB)
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                alert(`Memory simulation started: ${data.message}`);
+                
+                // Re-enable button after a delay
+                setTimeout(() => {
+                    document.getElementById('simulateBtn').disabled = false;
+                    document.getElementById('simulateBtn').innerHTML = '<i class="fas fa-fire me-1"></i>Simulate Usage';
+                    
+                    // Refresh memory stats
+                    fetchMemoryStats();
+                }, 2000);
+            } else {
+                alert('Failed to simulate memory usage: ' + (data.error || 'Unknown error'));
+                document.getElementById('simulateBtn').disabled = false;
+                document.getElementById('simulateBtn').innerHTML = '<i class="fas fa-fire me-1"></i>Simulate Usage';
+            }
+        })
+        .catch(error => {
+            console.error('Error simulating memory usage:', error);
+            alert('An error occurred during simulation: ' + error.message);
+            document.getElementById('simulateBtn').disabled = false;
+            document.getElementById('simulateBtn').innerHTML = '<i class="fas fa-fire me-1"></i>Simulate Usage';
+        });
+    }
+
+    // Function to fetch and display logs
+    function fetchLogs(type = 'memory', limit = 20) {
+        const logsContent = document.getElementById('logsContent');
+        logsContent.innerHTML = `
+            <tr>
+                <td colspan="4" class="text-center py-5">
+                    <div class="spinner-border text-secondary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Loading logs...</p>
+                </td>
+            </tr>
+        `;
+        
+        const endpoint = type === 'memory' ? '/api/logs/memory' :
+                        type === 'prediction' ? '/api/logs/predictions' :
+                        type === 'healing' ? '/api/logs/healing' : '/api/logs/memory';
+        
+        fetch(`${endpoint}?limit=${limit}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const logs = data.logs || [];
+                    
+                    if (logs.length === 0) {
+                        logsContent.innerHTML = `
+                            <tr>
+                                <td colspan="4" class="text-center py-4">
+                                    <i class="fas fa-info-circle fa-2x mb-3 text-secondary"></i>
+                                    <p>No logs available. Events will appear here as they occur.</p>
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+                    
+                    let html = '';
+                    logs.reverse().forEach(log => {
+                        const timestamp = new Date(log.timestamp).toLocaleString();
+                        let typeText, statusText, details;
+                        
+                        if (type === 'memory') {
+                            const anomalyDetected = log.analysis && log.analysis.anomaly_detected;
+                            typeText = 'Memory Event';
+                            statusText = anomalyDetected ? 
+                                `<span class="badge bg-danger">Anomaly (${log.analysis.severity || 'unknown'})</span>` : 
+                                '<span class="badge bg-success">Normal</span>';
+                            details = anomalyDetected ? 
+                                log.analysis.anomaly_description || 'Anomaly detected' : 
+                                'Memory within normal parameters';
+                        } else if (type === 'prediction') {
+                            const hasIssues = log.predicted_issues && log.predicted_issues.length > 0;
+                            typeText = 'Prediction';
+                            statusText = hasIssues ? 
+                                '<span class="badge bg-warning text-dark">Issues Predicted</span>' : 
+                                '<span class="badge bg-success">Normal</span>';
+                            details = hasIssues ? 
+                                `${log.predicted_issues[0].description || 'Issue predicted'} (Probability: ${(log.predicted_issues[0].probability * 100).toFixed(1)}%)` : 
+                                `Predicted usage in 1h: ${log.predicted_memory_usage_1h.toFixed(1)}%`;
+                        } else if (type === 'healing') {
+                            const effective = log.validation && log.validation.effective;
+                            typeText = 'Healing Event';
+                            statusText = effective ? 
+                                '<span class="badge bg-success">Effective</span>' : 
+                                '<span class="badge bg-warning text-dark">Limited Effect</span>';
+                            details = log.validation ? 
+                                `Memory change: ${log.results && log.results.memory_change ? log.results.memory_change.difference.toFixed(1) : 0}% reduction` : 
+                                'Healing plan executed';
+                        }
+                        
+                        html += `
+                            <tr>
+                                <td>${timestamp}</td>
+                                <td>${typeText}</td>
+                                <td>${statusText}</td>
+                                <td>${details}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    logsContent.innerHTML = html;
+                    document.getElementById('logStats').textContent = `Showing ${logs.length} log entries`;
+                } else {
+                    logsContent.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="text-center py-4">
+                                <i class="fas fa-exclamation-circle fa-2x mb-3 text-danger"></i>
+                                <p>Error fetching logs: ${data.error || 'Unknown error'}</p>
+                            </td>
+                        </tr>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error(`Error fetching ${type} logs:`, error);
+                logsContent.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center py-4">
+                            <i class="fas fa-exclamation-circle fa-2x mb-3 text-danger"></i>
+                            <p>Error fetching logs: ${error.message}</p>
+                        </td>
+                    </tr>
+                `;
+            });
+    }
+
+    // Initialize page
+    function initializePage() {
+        // Fetch initial memory stats
+        fetchMemoryStats();
+        
+        // Fetch initial logs
+        fetchLogs('memory');
+        
+        // Set up auto-refresh timer
+        let autoRefreshInterval = null;
+        const toggleAutoRefresh = () => {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+                document.getElementById('autoRefreshBtn').classList.remove('btn-primary');
+                document.getElementById('autoRefreshBtn').classList.add('btn-outline-primary');
+            } else {
+                autoRefreshInterval = setInterval(fetchMemoryStats, 5000); // Refresh every 5 seconds
+                document.getElementById('autoRefreshBtn').classList.remove('btn-outline-primary');
+                document.getElementById('autoRefreshBtn').classList.add('btn-primary');
+            }
+        };
+        
+        // Set up event listeners
+        document.getElementById('refreshBtn').addEventListener('click', fetchMemoryStats);
+        document.getElementById('autoRefreshBtn').addEventListener('click', toggleAutoRefresh);
+        document.getElementById('analyzeBtn').addEventListener('click', analyzeMemory);
+        document.getElementById('predictBtn').addEventListener('click', generatePrediction);
+        document.getElementById('planHealBtn').addEventListener('click', generateHealingPlan);
+        document.getElementById('executeHealBtn').addEventListener('click', executeHealing);
+        document.getElementById('simulateBtn').addEventListener('click', simulateMemoryUsage);
+        
+        // Memory usage simulator range
+        document.getElementById('memoryUsage').addEventListener('input', function() {
+            document.getElementById('memoryUsageValue').textContent = `${this.value} MB`;
+        });
+        
+        // Leak rate simulator range
+        document.getElementById('leakRate').addEventListener('input', function() {
+            document.getElementById('leakRateValue').textContent = `${this.value} MB/min`;
+        });
+        
+        // Log type buttons
+        document.getElementById('memoryLogsBtn').addEventListener('click', function() {
+            document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            fetchLogs('memory');
+        });
+        
+        document.getElementById('predictionLogsBtn').addEventListener('click', function() {
+            document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            fetchLogs('prediction');
+        });
+        
+        document.getElementById('healingLogsBtn').addEventListener('click', function() {
+            document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            fetchLogs('healing');
+        });
+        
+        // Chart type options
+        document.querySelectorAll('.chart-type-option').forEach(option => {
+            option.addEventListener('click', function(e) {
+                e.preventDefault();
+                const chartType = this.getAttribute('data-type');
+                memoryBreakdownChart.config.type = chartType;
+                memoryBreakdownChart.update();
+            });
+        });
+        
+        // Modal action buttons
+        document.getElementById('generateHealingPlanBtn').addEventListener('click', function() {
+            const analysisModal = bootstrap.Modal.getInstance(document.getElementById('analysisModal'));
+            analysisModal.hide();
+            
+            const healingModal = new bootstrap.Modal(document.getElementById('healingModal'));
+            healingModal.show();
+            
+            generateHealingPlan();
+        });
+        
+        document.getElementById('executeHealingModalBtn').addEventListener('click', function() {
+            const healingModal = bootstrap.Modal.getInstance(document.getElementById('healingModal'));
+            healingModal.hide();
+            
+            executeHealing();
+        });
+        
+        // Memory leak simulation
+        let leakInterval = null;
+        document.getElementById('startLeakBtn').addEventListener('click', function() {
+            const leakRate = parseInt(document.getElementById('leakRate').value);
+            this.disabled = true;
+            document.getElementById('stopLeakBtn').disabled = false;
+            
+            // Simulate a memory leak by allocating more memory every minute
+            leakInterval = setInterval(() => {
+                fetch('/api/memory/simulate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        usage_mb: leakRate
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log(`Leak simulation: allocated ${leakRate}MB`);
+                        fetchMemoryStats();
+                    }
+                })
+                .catch(error => console.error('Error in leak simulation:', error));
+            }, 60000); // Every minute
+            
+            // Immediate first allocation
+            fetch('/api/memory/simulate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    usage_mb: leakRate
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log(`Initial leak simulation: allocated ${leakRate}MB`);
+                    fetchMemoryStats();
+                }
+            })
+            .catch(error => console.error('Error in initial leak simulation:', error));
+        });
+        
+        document.getElementById('stopLeakBtn').addEventListener('click', function() {
+            if (leakInterval) {
+                clearInterval(leakInterval);
+                leakInterval = null;
+                this.disabled = true;
+                document.getElementById('startLeakBtn').disabled = false;
+            }
+        });
+    }
+    
+    // Initialize everything when the page loads
+    initializePage();
+});
+</script>
+
+<style>
+    .gauge-container {
+        position: relative;
+        width: 200px;
+        height: 100px;
+    }
+
+    .gauge-value-container {
+        position: absolute;
+        top: 55%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+    }
+    
+    .card-header {
+        border-bottom: 1px solid var(--bs-secondary);
+    }
+    
+    .alert {
+        background-color: rgba(0, 0, 0, 0.2);
+    }
+    
+    .table-dark {
+        --bs-table-bg: transparent;
+    }
+    
+    .table-dark > :not(caption) > * > * {
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .sticky-top {
+        background-color: #212529 !important;
+        border-bottom: 2px solid var(--bs-secondary);
+        z-index: 999;
+    }
+    
+    .log-entry {
+        border-left: 3px solid var(--bs-secondary);
+        padding-left: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .log-entry.anomaly {
+        border-left-color: var(--bs-danger);
+    }
+    
+    .log-entry.healing {
+        border-left-color: var(--bs-success);
+    }
+    
+    .log-entry.prediction {
+        border-left-color: var(--bs-info);
+    }
+    
+    .time-range-btn.active {
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+    }
+</style>
+{% endblock %}
