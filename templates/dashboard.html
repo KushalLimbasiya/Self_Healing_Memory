@@ -1,0 +1,340 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- System Status Overview -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">System Status</h4>
+                    <div>
+                        <span id="lastUpdated" class="badge bg-secondary me-2">Last updated: Never</span>
+                        <button id="refreshBtn" class="btn btn-sm btn-outline-info">
+                            <i class="fas fa-sync-alt me-1"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card bg-dark border-primary h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Current Memory Usage</h5>
+                                    <div class="text-center">
+                                        <div class="progress mb-3" style="height: 25px;">
+                                            <div id="memoryUsageBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                                        </div>
+                                        <h3 id="memoryUsageText">0%</h3>
+                                        <p id="memoryDetailsText" class="text-muted">Loading memory details...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card bg-dark border-info h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Memory Status</h5>
+                                    <div class="text-center">
+                                        <i id="statusIcon" class="fas fa-question-circle fa-4x mb-2 text-secondary"></i>
+                                        <h3 id="statusText">Unknown</h3>
+                                        <p id="statusDescription" class="text-muted">Loading status...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card bg-dark border-warning h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Prediction</h5>
+                                    <div class="text-center">
+                                        <i id="predictionIcon" class="fas fa-chart-line fa-4x mb-2 text-secondary"></i>
+                                        <h3 id="predictionText">No Data</h3>
+                                        <p id="predictionDescription" class="text-muted">No prediction data available</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card bg-dark border-success h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Healing Status</h5>
+                                    <div class="text-center">
+                                        <i id="healingIcon" class="fas fa-heartbeat fa-4x mb-2 text-secondary"></i>
+                                        <h3 id="healingText">No Data</h3>
+                                        <p id="healingDescription" class="text-muted">No healing data available</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Memory Usage Chart -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header">
+                    <h4 class="mb-0">Memory Usage History</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="memoryChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Actions and Controls -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-dark border-info">
+                <div class="card-header">
+                    <h5 class="mb-0">Monitor Agent</h5>
+                </div>
+                <div class="card-body">
+                    <p>Analyze current memory conditions and detect anomalies.</p>
+                    <button id="analyzeBtn" class="btn btn-info">
+                        <i class="fas fa-search me-1"></i>Analyze Memory
+                    </button>
+                    <div id="analyzeResult" class="mt-3">
+                        <div class="placeholder-glow">
+                            <span class="placeholder col-12"></span>
+                            <span class="placeholder col-10"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-dark border-warning">
+                <div class="card-header">
+                    <h5 class="mb-0">Predictor Agent</h5>
+                </div>
+                <div class="card-body">
+                    <p>Forecast future memory conditions based on current trends.</p>
+                    <button id="predictBtn" class="btn btn-warning">
+                        <i class="fas fa-chart-line me-1"></i>Generate Prediction
+                    </button>
+                    <div id="predictResult" class="mt-3">
+                        <div class="placeholder-glow">
+                            <span class="placeholder col-12"></span>
+                            <span class="placeholder col-10"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-dark border-success">
+                <div class="card-header">
+                    <h5 class="mb-0">Healer Agent</h5>
+                </div>
+                <div class="card-body">
+                    <p>Generate and apply healing actions to resolve memory issues.</p>
+                    <div class="d-grid gap-2">
+                        <button id="planHealBtn" class="btn btn-outline-success">
+                            <i class="fas fa-list-check me-1"></i>Generate Healing Plan
+                        </button>
+                        <button id="executeHealBtn" class="btn btn-success">
+                            <i class="fas fa-wrench me-1"></i>Execute Healing
+                        </button>
+                    </div>
+                    <div id="healResult" class="mt-3">
+                        <div class="placeholder-glow">
+                            <span class="placeholder col-12"></span>
+                            <span class="placeholder col-10"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testing Tools -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header">
+                    <h4 class="mb-0">Testing Tools</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card bg-dark border-danger mb-3">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Simulate Memory Usage</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>Simulate high memory usage to test the system's response.</p>
+                                    <div class="form-group mb-3">
+                                        <label for="memoryUsage" class="form-label">Memory Usage (MB)</label>
+                                        <input type="range" class="form-range" id="memoryUsage" min="10" max="500" value="100">
+                                        <div class="d-flex justify-content-between">
+                                            <small>10 MB</small>
+                                            <small id="memoryUsageValue">100 MB</small>
+                                            <small>500 MB</small>
+                                        </div>
+                                    </div>
+                                    <button id="simulateBtn" class="btn btn-danger">
+                                        <i class="fas fa-fire me-1"></i>Simulate Usage
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-dark border-info mb-3">
+                                <div class="card-header">
+                                    <h5 class="mb-0">System Information</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush bg-transparent">
+                                        <li class="list-group-item bg-transparent d-flex justify-content-between">
+                                            <span>Total Memory:</span>
+                                            <span id="totalMemory">Loading...</span>
+                                        </li>
+                                        <li class="list-group-item bg-transparent d-flex justify-content-between">
+                                            <span>Free Memory:</span>
+                                            <span id="freeMemory">Loading...</span>
+                                        </li>
+                                        <li class="list-group-item bg-transparent d-flex justify-content-between">
+                                            <span>Available Memory:</span>
+                                            <span id="availableMemory">Loading...</span>
+                                        </li>
+                                        <li class="list-group-item bg-transparent d-flex justify-content-between">
+                                            <span>Buffers:</span>
+                                            <span id="buffers">Loading...</span>
+                                        </li>
+                                        <li class="list-group-item bg-transparent d-flex justify-content-between">
+                                            <span>Cached:</span>
+                                            <span id="cached">Loading...</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Viewer -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">System Logs</h4>
+                    <div class="btn-group" role="group">
+                        <button id="memoryLogsBtn" class="btn btn-sm btn-info active">Memory Events</button>
+                        <button id="predictionLogsBtn" class="btn btn-sm btn-warning">Predictions</button>
+                        <button id="healingLogsBtn" class="btn btn-sm btn-success">Healing Events</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="logsContainer" class="log-container">
+                        <div id="logsContent">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-secondary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3">Loading logs...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Anomaly Alert Modal -->
+<div class="modal fade" id="anomalyModal" tabindex="-1" aria-labelledby="anomalyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark border-danger">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="anomalyModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Memory Anomaly Detected
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="anomalyDetails">
+                    <p>A memory anomaly has been detected in the system.</p>
+                    <div class="alert alert-danger">
+                        <strong>Severity:</strong> <span id="anomalySeverity">High</span>
+                        <hr>
+                        <div id="anomalyDescription">Memory usage has reached a critical level.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Dismiss</button>
+                <button type="button" class="btn btn-success" id="autoHealBtn">Auto-Heal</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Healing Result Modal -->
+<div class="modal fade" id="healingModal" tabindex="-1" aria-labelledby="healingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark border-success">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="healingModalLabel">
+                    <i class="fas fa-heart-pulse me-2"></i>Healing Results
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="healingDetails">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="card bg-dark border-secondary">
+                                <div class="card-header">Before Healing</div>
+                                <div class="card-body">
+                                    <div class="progress mb-2" style="height: 20px;">
+                                        <div id="beforeHealingBar" class="progress-bar bg-danger" role="progressbar" style="width: 0%;">0%</div>
+                                    </div>
+                                    <div id="beforeHealingDetails">Loading...</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-dark border-secondary">
+                                <div class="card-header">After Healing</div>
+                                <div class="card-body">
+                                    <div class="progress mb-2" style="height: 20px;">
+                                        <div id="afterHealingBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;">0%</div>
+                                    </div>
+                                    <div id="afterHealingDetails">Loading...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h5>Actions Performed:</h5>
+                    <ul id="actionsPerformed" class="list-group list-group-flush bg-transparent">
+                        <li class="list-group-item bg-transparent">Loading actions...</li>
+                    </ul>
+                    
+                    <div class="alert alert-info mt-3">
+                        <strong>Effectiveness:</strong> <span id="healingEffectiveness">Unknown</span>
+                        <div id="healingEffectivenessDetails" class="mt-2">Analyzing healing effectiveness...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
