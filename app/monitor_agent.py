@@ -26,13 +26,13 @@ class MemoryMonitorAgent:
         self.rag_pipeline = rag_pipeline
         self.running = False
         self.monitor_thread = None
-        self.monitor_interval = 60  # Default monitoring interval in seconds
+        self.monitor_interval = 60  
         self.llm_processor = LLMProcessor(
             model="mistral",
             api_key=os.environ.get("MISTRAL_API_KEY_MONITOR"),
             cache_dir="data/monitor_cache"
         )
-        self.memory_threshold = 0.8  # 80% memory usage is considered high
+        self.memory_threshold = 0.8  
         logger.info("Memory Monitor Agent initialized")
         
     def start_monitoring(self, interval=60):
@@ -66,27 +66,19 @@ class MemoryMonitorAgent:
         """Main monitoring loop that runs in a separate thread."""
         while self.running:
             try:
-                # Get memory statistics
                 memory_stats = get_memory_stats()
                 
-                # Analyze the memory conditions
                 analysis = self.analyze_memory_conditions(memory_stats)
                 
-                # Log the memory event
                 self._log_memory_event(memory_stats, analysis)
                 
-                # If the RAG pipeline is available, add the event to it
                 if self.rag_pipeline:
                     self.rag_pipeline.add_memory_event(memory_stats, analysis)
                 
-                # Check if any anomalies were detected
                 if analysis.get('anomaly_detected', False):
                     logger.warning(f"Memory anomaly detected: {analysis.get('anomaly_description')}")
-                    # The predictor and healer agents will handle this through the RAG pipeline
                 
-                # Adaptive monitoring: adjust interval based on memory conditions
                 if memory_stats.get('used_percent', 0) > 90:
-                    # More frequent checks when memory usage is high
                     time.sleep(max(10, self.monitor_interval // 3))
                 else:
                     time.sleep(self.monitor_interval)
@@ -106,7 +98,6 @@ class MemoryMonitorAgent:
             Dictionary containing analysis results
         """
         try:
-            # Basic threshold analysis
             used_percent = memory_stats.get('used_percent', 0)
             free_memory = memory_stats.get('free', 0)
             
@@ -118,7 +109,6 @@ class MemoryMonitorAgent:
                 'recommendation': None
             }
             
-            # Determine memory usage level
             if used_percent > 90:
                 analysis['usage_level'] = 'critical'
             elif used_percent > 80:
@@ -126,7 +116,6 @@ class MemoryMonitorAgent:
             elif used_percent > 60:
                 analysis['usage_level'] = 'moderate'
                 
-            # Check for anomalies using simple rules
             if used_percent > 90 and free_memory < 500 * 1024 * 1024:  # Less than 500MB free
                 analysis['anomaly_detected'] = True
                 analysis['severity'] = 'critical'
@@ -138,7 +127,6 @@ class MemoryMonitorAgent:
                 analysis['anomaly_description'] = 'High memory usage detected'
                 analysis['recommendation'] = 'Consider freeing unused memory'
                 
-            # Enhance analysis with LLM if available
             if self.llm_processor and self.rag_pipeline:
                 historical_context = self.rag_pipeline.get_relevant_memory_events(memory_stats)
                 enhanced_analysis = self._llm_enhanced_analysis(memory_stats, historical_context)
@@ -148,7 +136,6 @@ class MemoryMonitorAgent:
             
         except Exception as e:
             logger.error(f"Error analyzing memory conditions: {str(e)}")
-            # Return basic analysis in case of error
             return {
                 'timestamp': datetime.now().isoformat(),
                 'anomaly_detected': False,
@@ -194,9 +181,7 @@ class MemoryMonitorAgent:
             
             response = self.llm_processor.process(prompt)
             
-            # Extract JSON from the response
             try:
-                # Find JSON block in response (in case the LLM added other text)
                 json_str = response
                 if "```json" in response:
                     json_str = response.split("```json")[1].split("```")[0].strip()

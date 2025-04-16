@@ -2,23 +2,16 @@ import os
 import logging
 import threading
 import time
-from web_interface import app as application
 
-# Import models needed for web interface
-import models
-
-# For agent instances
-from app.monitor_agent import MemoryMonitorAgent
-from app.predictor_agent import MemoryPredictorAgent
-from app.healer_agent import MemoryHealerAgent
-from app.rag_pipeline import RagPipeline
-from app.ingestion import LogIngestionSystem
-
-# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("logs/system.log", mode='a'),
+        logging.StreamHandler()
+    ]
+)
 logger = logging.getLogger(__name__)
-
-# Export the app for Gunicorn to use
-app = application
 
 def ensure_directories():
     """Create necessary directories if they don't exist."""
@@ -26,26 +19,39 @@ def ensure_directories():
             "data/predictor_cache", "data/healer_cache"]
     
     for directory in dirs:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-            logger.info(f"Created directory: {directory}")
+        win_dir = directory.replace('/', '\\')
+        if not os.path.exists(win_dir):
+            os.makedirs(win_dir)
+            logger.info(f"Created directory: {win_dir}")
+
+ensure_directories()
+# Set environment variable to disable SQLAlchemy
+os.environ['DISABLE_DATABASE'] = 'true'
+logger.info("Database functionality disabled")
+
+from web_interface import app as application
+import models
+
+from app.monitor_agent import MemoryMonitorAgent
+from app.predictor_agent import MemoryPredictorAgent
+from app.healer_agent import MemoryHealerAgent
+from app.rag_pipeline import RagPipeline
+from app.ingestion import LogIngestionSystem
+
+app = application
 
 def start_agents():
     """Initialize and start memory management agents."""
     try:
-        # Create ingestion system
         ingestion = LogIngestionSystem()
         ingestion.start()
         
-        # Create RAG pipeline
         rag = RagPipeline()
         
-        # Initialize agents with the RAG pipeline
         monitor = MemoryMonitorAgent(rag)
         predictor = MemoryPredictorAgent(rag)
         healer = MemoryHealerAgent(rag)
         
-        # Start agents in separate threads
         monitor.start_monitoring()
         predictor.start_prediction_service()
         healer.start_healing_service()
@@ -61,24 +67,17 @@ def main():
     """Main entry point for the self-healing memory system."""
     logger.info("Starting Self-Healing Memory System")
     
-    # Ensure all required directories exist
-    ensure_directories()
-    
-    # Start memory agents
     agents = start_agents()
     
-    # Run Flask in a separate thread
     flask_thread = threading.Thread(target=lambda: app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False))
     flask_thread.daemon = True
     flask_thread.start()
     
     try:
-        # Keep the main thread alive
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
         logger.info("Shutting down Self-Healing Memory System")
-        # Cleanup could be added here
         
 if __name__ == "__main__":
     main()

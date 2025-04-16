@@ -9,15 +9,12 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-# Check if we can use the Rust library
 try:
-    # Try to load the Rust library if it exists
     lib_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "target/release/libmemory_core.so")
     
     if os.path.exists(lib_path):
         memory_lib = ctypes.CDLL(lib_path)
         
-        # Define function argument and return types
         memory_lib.get_memory_stats_json.restype = ctypes.c_char_p
         
         logger.info("Loaded Rust memory core library")
@@ -37,17 +34,14 @@ def get_memory_stats():
         Dictionary containing memory statistics
     """
     try:
-        # Try to use the Rust library if available
         if RUST_LIB_AVAILABLE:
             json_data = memory_lib.get_memory_stats_json()
             stats = json.loads(json_data.decode('utf-8'))
             return stats
         
-        # Fall back to Python implementation
         return _get_memory_stats_python()
     except Exception as e:
         logger.error(f"Error getting memory statistics: {str(e)}")
-        # Return minimal stats on error
         return {
             "total": 0,
             "free": 0,
@@ -104,7 +98,6 @@ def _get_memory_stats_linux():
         buffers = mem_info.get('Buffers', 0)
         cached = mem_info.get('Cached', 0)
         
-        # Calculate used memory and percentage
         used = total - free - buffers - cached
         used_percent = (used / total) * 100 if total > 0 else 0
         
@@ -125,12 +118,10 @@ def _get_memory_stats_linux():
 def _get_memory_stats_mac():
     """Get memory statistics on macOS."""
     try:
-        # Use vm_stat command on macOS
         vm_stat = subprocess.run(['vm_stat'], stdout=subprocess.PIPE, text=True).stdout.strip().split('\n')
         
-        # Parse vm_stat output
         memory_stats = {}
-        for line in vm_stat[1:]:  # Skip the first line (header)
+        for line in vm_stat[1:]:  
             parts = line.split(':')
             if len(parts) == 2:
                 key = parts[0].strip()
@@ -140,14 +131,11 @@ def _get_memory_stats_mac():
                 except ValueError:
                     pass
         
-        # Get page size
-        page_size = 4096  # Default page size in bytes
+        page_size = 4096  
         
-        # Try to get total memory using sysctl
         total_memory = subprocess.run(['sysctl', '-n', 'hw.memsize'], stdout=subprocess.PIPE, text=True)
         total = int(total_memory.stdout.strip())
         
-        # Calculate memory values
         free = memory_stats.get('Pages free', 0) * page_size
         inactive = memory_stats.get('Pages inactive', 0) * page_size
         available = free + inactive
@@ -170,7 +158,6 @@ def _get_memory_stats_mac():
 def _get_memory_stats_windows():
     """Get memory statistics on Windows."""
     try:
-        # On Windows, use ctypes to call Windows API
         class MEMORYSTATUSEX(ctypes.Structure):
             _fields_ = [
                 ("dwLength", ctypes.c_ulong),
@@ -212,19 +199,15 @@ def release_memory_cache():
         Boolean indicating if the operation was successful
     """
     try:
-        # Try to use the Rust library if available
         if RUST_LIB_AVAILABLE and hasattr(memory_lib, 'release_memory_cache'):
             success = memory_lib.release_memory_cache()
             return success == 1
         
-        # Fall back to Python implementation
         system = platform.system().lower()
         
         if system == "linux":
-            # On Linux, sync and drop caches
             subprocess.run(['sync'], check=True)
             try:
-                # This requires root privileges, might fail
                 with open('/proc/sys/vm/drop_caches', 'w') as f:
                     f.write('3')
                 return True
@@ -232,7 +215,6 @@ def release_memory_cache():
                 logger.warning("Couldn't drop caches, might need root privileges")
                 return False
         elif system == "darwin":  # macOS
-            # On macOS, use purge (requires sudo)
             try:
                 subprocess.run(['purge'], check=True)
                 return True
@@ -240,7 +222,6 @@ def release_memory_cache():
                 logger.warning("Couldn't run purge, might need sudo")
                 return False
         elif system == "windows":
-            # On Windows, call the garbage collector
             import gc
             gc.collect()
             return True
@@ -263,16 +244,13 @@ def simulate_memory_usage(usage_mb):
         Boolean indicating if the simulation was successful
     """
     try:
-        # Create a list of byte arrays to consume memory
         data = []
         for _ in range(usage_mb):
             # Allocate 1 MB
             data.append(bytearray(1024 * 1024))
         
-        # Keep the memory allocated for a moment
         time.sleep(5)
         
-        # Release the memory
         data = None
         
         return True

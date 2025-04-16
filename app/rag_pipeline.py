@@ -19,12 +19,10 @@ class RagPipeline:
         self.db_dir = "data"
         os.makedirs(self.db_dir, exist_ok=True)
         
-        # In-memory storage for events (simplified version)
         self.memory_events = []
         self.predictions = []
         self.healing_events = []
         
-        # Start ingestion thread
         self.running = True
         self.ingestion_thread = threading.Thread(target=self._background_ingestion)
         self.ingestion_thread.daemon = True
@@ -40,8 +38,7 @@ class RagPipeline:
                 self._ingest_predictions_from_file()
                 self._ingest_healing_events_from_file()
                 
-                # Sleep before next ingestion cycle
-                time.sleep(60)  # Check for new log entries every minute
+                time.sleep(60)  
             except Exception as e:
                 logger.error(f"Error in background ingestion: {str(e)}")
                 time.sleep(60)
@@ -52,14 +49,11 @@ class RagPipeline:
             if not os.path.exists("data/memory_events.jsonl"):
                 return
             
-            # Read all lines from the file
             with open("data/memory_events.jsonl", "r") as f:
                 lines = f.readlines()
             
-            # Clear current events and reload (simple approach)
             self.memory_events = []
             
-            # Load all events (limit to last 100 for performance)
             for line in lines[-100:]:
                 try:
                     event = json.loads(line.strip())
@@ -77,14 +71,11 @@ class RagPipeline:
             if not os.path.exists("data/memory_predictions.jsonl"):
                 return
             
-            # Read all lines from the file
             with open("data/memory_predictions.jsonl", "r") as f:
                 lines = f.readlines()
             
-            # Clear current predictions and reload
             self.predictions = []
             
-            # Load all predictions (limit to last 100 for performance)
             for line in lines[-100:]:
                 try:
                     prediction = json.loads(line.strip())
@@ -102,14 +93,11 @@ class RagPipeline:
             if not os.path.exists("data/healing_events.jsonl"):
                 return
             
-            # Read all lines from the file
             with open("data/healing_events.jsonl", "r") as f:
                 lines = f.readlines()
             
-            # Clear current healing events and reload
             self.healing_events = []
             
-            # Load all healing events (limit to last 100 for performance)
             for line in lines[-100:]:
                 try:
                     event = json.loads(line.strip())
@@ -136,10 +124,8 @@ class RagPipeline:
                 "analysis": analysis
             }
             
-            # Append to the memory events list
             self.memory_events.append(event)
             
-            # Write to log file
             with open("data/memory_events.jsonl", "a") as f:
                 f.write(json.dumps(event) + "\n")
             
@@ -155,10 +141,8 @@ class RagPipeline:
             prediction: Prediction dictionary
         """
         try:
-            # Append to the predictions list
             self.predictions.append(prediction)
             
-            # Write to log file
             with open("data/memory_predictions.jsonl", "a") as f:
                 f.write(json.dumps(prediction) + "\n")
             
@@ -185,10 +169,8 @@ class RagPipeline:
                 "validation": validation
             }
             
-            # Append to the healing events list
             self.healing_events.append(event)
             
-            # Write to log file
             with open("data/healing_events.jsonl", "a") as f:
                 f.write(json.dumps(event) + "\n")
             
@@ -209,7 +191,6 @@ class RagPipeline:
             List of relevant memory events
         """
         try:
-            # Simple approach: get the most recent events
             events = sorted(self.memory_events, key=lambda e: e.get("timestamp", ""), reverse=True)
             return events[:limit]
         except Exception as e:
@@ -227,7 +208,6 @@ class RagPipeline:
             List of recent predictions
         """
         try:
-            # Sort by timestamp and get the most recent
             predictions = sorted(self.predictions, key=lambda p: p.get("timestamp", ""), reverse=True)
             return predictions[:limit]
         except Exception as e:
@@ -246,7 +226,6 @@ class RagPipeline:
             List of similar healing events
         """
         try:
-            # Simple approach: get the most recent healing events
             events = sorted(self.healing_events, key=lambda e: e.get("timestamp", ""), reverse=True)
             return events[:limit]
         except Exception as e:

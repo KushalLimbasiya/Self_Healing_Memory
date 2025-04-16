@@ -25,7 +25,7 @@ class MemoryPredictorAgent:
         self.rag_pipeline = rag_pipeline
         self.running = False
         self.predictor_thread = None
-        self.prediction_interval = 300  # Default prediction interval in seconds (5 minutes)
+        self.prediction_interval = 300  
         self.llm_processor = LLMProcessor(
             model="mistral",
             api_key=os.environ.get("MISTRAL_API_KEY_PREDICTOR"),
@@ -65,30 +65,23 @@ class MemoryPredictorAgent:
         """Main prediction loop that runs in a separate thread."""
         while self.running:
             try:
-                # Get current memory statistics
                 memory_stats = get_memory_stats()
                 
-                # Retrieve historical data using RAG pipeline
                 if self.rag_pipeline:
                     historical_data = self.rag_pipeline.get_relevant_memory_events(
                         memory_stats, 
                         limit=20,
-                        time_window=3600  # Last hour
+                        time_window=3600 
                     )
                 else:
-                    # If RAG pipeline is not available, use a simple approach to load recent events
                     historical_data = self._load_recent_events(20)
                 
-                # Generate prediction
                 prediction = self.predict_memory_condition(memory_stats, historical_data)
                 
-                # Store the latest prediction
                 self.latest_prediction = prediction
                 
-                # Log the prediction
                 self._log_prediction(prediction)
                 
-                # Sleep until next prediction
                 time.sleep(self.prediction_interval)
                     
             except Exception as e:
@@ -107,7 +100,6 @@ class MemoryPredictorAgent:
             Dictionary containing prediction results
         """
         try:
-            # Basic prediction without LLM
             prediction = {
                 'timestamp': datetime.now().isoformat(),
                 'current_memory_used': current_stats.get('used_percent', 0),
@@ -115,20 +107,16 @@ class MemoryPredictorAgent:
                 'predicted_issues': []
             }
             
-            # Simple trend analysis
             if len(historical_data) >= 3:
-                # Calculate trend from the last few data points
                 recent_values = [event.get('stats', {}).get('used_percent', 0) for event in historical_data[-3:]]
                 if all(recent_values):
                     trend = sum([(recent_values[i] - recent_values[i-1]) for i in range(1, len(recent_values))]) / (len(recent_values) - 1)
                     
-                    # Extrapolate the trend
                     current_value = current_stats.get('used_percent', 0)
                     predicted_value_1h = current_value + (trend * (3600 / self.prediction_interval))
                     
                     prediction['predicted_memory_usage_1h'] = min(100, max(0, predicted_value_1h))
                     
-                    # Add prediction details
                     if predicted_value_1h > 90:
                         prediction['predicted_issues'].append({
                             'severity': 'critical',
@@ -144,20 +132,17 @@ class MemoryPredictorAgent:
                             'timeframe': '1 hour'
                         })
             
-            # Enhance prediction with LLM if available
             if self.llm_processor:
                 enhanced_prediction = self._llm_enhanced_prediction(current_stats, historical_data)
-                # Merge the enhanced prediction with the basic one
                 if enhanced_prediction:
                     for key, value in enhanced_prediction.items():
-                        if key not in prediction or value:  # Only update if the field exists and has a value
+                        if key not in prediction or value:
                             prediction[key] = value
             
             return prediction
                 
         except Exception as e:
             logger.error(f"Error predicting memory condition: {str(e)}")
-            # Return basic prediction in case of error
             return {
                 'timestamp': datetime.now().isoformat(),
                 'error': str(e),
@@ -176,9 +161,8 @@ class MemoryPredictorAgent:
             Enhanced prediction from the LLM
         """
         try:
-            # Prepare a simplified version of historical data to keep prompt size manageable
             simplified_history = []
-            for event in historical_data[-10:]:  # Use only the most recent 10 events
+            for event in historical_data[-10:]:
                 simplified_event = {
                     'timestamp': event.get('timestamp', ''),
                     'used_percent': event.get('stats', {}).get('used_percent', 0),
@@ -212,9 +196,7 @@ class MemoryPredictorAgent:
             
             response = self.llm_processor.process(prompt)
             
-            # Extract JSON from the response
             try:
-                # Find JSON block in response (in case the LLM added other text)
                 json_str = response
                 if "```json" in response:
                     json_str = response.split("```json")[1].split("```")[0].strip()

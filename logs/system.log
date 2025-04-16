@@ -1,0 +1,260 @@
+2025-04-16 00:54:58,017 - app.memory_core - WARNING - Rust library not found at /home/runner/workspace/target/release/libmemory_core.so, using Python fallback
+2025-04-16 00:54:58,020 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:54:58,020 - app.monitor_agent - INFO - Memory Monitor Agent initialized
+2025-04-16 00:54:58,020 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:54:58,020 - app.predictor_agent - INFO - Memory Predictor Agent initialized
+2025-04-16 00:54:58,020 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:54:58,021 - app.healer_agent - INFO - Memory Healer Agent initialized
+2025-04-16 00:54:58,021 - web_interface - INFO - Web interface agent references initialized
+2025-04-16 00:56:08,281 - app.memory_core - WARNING - Rust library not found at /home/runner/workspace/target/release/libmemory_core.so, using Python fallback
+2025-04-16 00:56:10,601 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:56:10,602 - app.monitor_agent - INFO - Memory Monitor Agent initialized
+2025-04-16 00:56:10,602 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:56:10,602 - app.predictor_agent - INFO - Memory Predictor Agent initialized
+2025-04-16 00:56:10,602 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:56:10,602 - app.healer_agent - INFO - Memory Healer Agent initialized
+2025-04-16 00:56:10,602 - web_interface - INFO - Web interface agent references initialized
+2025-04-16 00:56:32,591 - app.memory_core - WARNING - Rust library not found at /home/runner/workspace/target/release/libmemory_core.so, using Python fallback
+2025-04-16 00:56:34,032 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:56:34,032 - app.monitor_agent - INFO - Memory Monitor Agent initialized
+2025-04-16 00:56:34,032 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:56:34,032 - app.predictor_agent - INFO - Memory Predictor Agent initialized
+2025-04-16 00:56:34,032 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:56:34,032 - app.healer_agent - INFO - Memory Healer Agent initialized
+2025-04-16 00:56:34,032 - web_interface - INFO - Web interface agent references initialized
+2025-04-16 00:57:04,343 - app.memory_core - WARNING - Rust library not found at /home/runner/workspace/target/release/libmemory_core.so, using Python fallback
+2025-04-16 00:57:05,770 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:57:05,771 - app.monitor_agent - INFO - Memory Monitor Agent initialized
+2025-04-16 00:57:05,771 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:57:05,771 - app.predictor_agent - INFO - Memory Predictor Agent initialized
+2025-04-16 00:57:05,771 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:57:05,771 - app.healer_agent - INFO - Memory Healer Agent initialized
+2025-04-16 00:57:05,771 - web_interface - INFO - Web interface agent references initialized
+2025-04-16 00:57:19,701 - app.memory_core - WARNING - Rust library not found at /home/runner/workspace/target/release/libmemory_core.so, using Python fallback
+2025-04-16 00:57:21,051 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:57:21,053 - app.monitor_agent - INFO - Memory Monitor Agent initialized
+2025-04-16 00:57:21,053 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:57:21,053 - app.predictor_agent - INFO - Memory Predictor Agent initialized
+2025-04-16 00:57:21,053 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:57:21,053 - app.healer_agent - INFO - Memory Healer Agent initialized
+2025-04-16 00:57:21,053 - web_interface - INFO - Web interface agent references initialized
+2025-04-16 00:57:38,906 - app.memory_core - WARNING - Rust library not found at /home/runner/workspace/target/release/libmemory_core.so, using Python fallback
+2025-04-16 00:57:40,294 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:57:40,294 - app.monitor_agent - INFO - Memory Monitor Agent initialized
+2025-04-16 00:57:40,294 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:57:40,294 - app.predictor_agent - INFO - Memory Predictor Agent initialized
+2025-04-16 00:57:40,295 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:57:40,295 - app.healer_agent - INFO - Memory Healer Agent initialized
+2025-04-16 00:57:40,295 - web_interface - INFO - Web interface agent references initialized
+2025-04-16 00:57:46,276 - app.memory_core - WARNING - Rust library not found at /home/runner/workspace/target/release/libmemory_core.so, using Python fallback
+2025-04-16 00:57:47,670 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:57:47,672 - app.monitor_agent - INFO - Memory Monitor Agent initialized
+2025-04-16 00:57:47,672 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:57:47,672 - app.predictor_agent - INFO - Memory Predictor Agent initialized
+2025-04-16 00:57:47,672 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:57:47,673 - app.healer_agent - INFO - Memory Healer Agent initialized
+2025-04-16 00:57:47,674 - web_interface - INFO - Web interface agent references initialized
+2025-04-16 01:06:04,666 - web_interface - INFO - Saved memory event to database: id=1
+2025-04-16 06:39:41,725 - app.memory_core - WARNING - Rust library not found at d:\data\windows\Downloads\IDM\Compressed\SelfHealingMemory-2\SelfHealingMemory-2\target/release/libmemory_core.so, using Python fallback
+2025-04-16 06:40:17,271 - app.memory_core - WARNING - Rust library not found at d:\data\windows\Downloads\IDM\Compressed\SelfHealingMemory-2\SelfHealingMemory-2\target/release/libmemory_core.so, using Python fallback
+2025-04-16 06:40:55,230 - app.memory_core - WARNING - Rust library not found at d:\data\windows\Downloads\IDM\Compressed\SelfHealingMemory-2\SelfHealingMemory-2\target/release/libmemory_core.so, using Python fallback
+2025-04-16 06:41:51,670 - app.memory_core - WARNING - Rust library not found at d:\data\windows\Downloads\IDM\Compressed\SelfHealingMemory-2\SelfHealingMemory-2\target/release/libmemory_core.so, using Python fallback
+2025-04-16 06:43:36,244 - app.memory_core - WARNING - Rust library not found at d:\data\windows\Downloads\IDM\Compressed\SelfHealingMemory-2\SelfHealingMemory-2\target/release/libmemory_core.so, using Python fallback
+2025-04-16 06:44:18,870 - app.memory_core - WARNING - Rust library not found at d:\data\windows\Downloads\IDM\Compressed\SelfHealingMemory-2\SelfHealingMemory-2\target/release/libmemory_core.so, using Python fallback
+2025-04-16 06:44:53,009 - __main__ - INFO - Database path set to: d:\data\windows\Downloads\IDM\Compressed\SelfHealingMemory-2\SelfHealingMemory-2\data\memory_system.db
+2025-04-16 06:44:53,807 - app.memory_core - WARNING - Rust library not found at d:\data\windows\Downloads\IDM\Compressed\SelfHealingMemory-2\SelfHealingMemory-2\target/release/libmemory_core.so, using Python fallback
+2025-04-16 06:46:43,194 - __main__ - INFO - Database path set to: d:\data\windows\Downloads\IDM\Compressed\SelfHealingMemory-2\SelfHealingMemory-2\data\memory_system.db
+2025-04-16 06:46:43,194 - __main__ - INFO - Database URI set to: sqlite:///d:/data/windows/Downloads/IDM/Compressed/SelfHealingMemory-2/SelfHealingMemory-2/data/memory_system.db
+2025-04-16 06:46:44,024 - app.memory_core - WARNING - Rust library not found at d:\data\windows\Downloads\IDM\Compressed\SelfHealingMemory-2\SelfHealingMemory-2\target/release/libmemory_core.so, using Python fallback
+2025-04-16 06:48:51,128 - __main__ - INFO - Database functionality disabled
+2025-04-16 06:48:51,906 - app.memory_core - WARNING - Rust library not found at d:\data\windows\Downloads\IDM\Compressed\SelfHealingMemory-2\SelfHealingMemory-2\target/release/libmemory_core.so, using Python fallback
+2025-04-16 06:48:51,939 - app - INFO - Database functionality disabled
+2025-04-16 06:48:51,940 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 06:48:51,940 - app.monitor_agent - INFO - Memory Monitor Agent initialized
+2025-04-16 06:48:51,940 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 06:48:51,940 - app.predictor_agent - INFO - Memory Predictor Agent initialized
+2025-04-16 06:48:51,940 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 06:48:51,941 - app.healer_agent - INFO - Memory Healer Agent initialized
+2025-04-16 06:48:51,941 - web_interface - INFO - Web interface agent references initialized
+2025-04-16 06:48:51,947 - __main__ - INFO - Starting Self-Healing Memory System
+2025-04-16 06:48:51,947 - app.ingestion - INFO - Log Ingestion System initialized
+2025-04-16 06:48:51,948 - app.ingestion - INFO - Memory statistics ingestion started with interval of 30 seconds
+2025-04-16 06:48:51,950 - app.rag_pipeline - INFO - Simplified RAG Pipeline initialized
+2025-04-16 06:48:51,950 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 06:48:51,950 - app.monitor_agent - INFO - Memory Monitor Agent initialized
+2025-04-16 06:48:51,951 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 06:48:51,951 - app.predictor_agent - INFO - Memory Predictor Agent initialized
+2025-04-16 06:48:51,951 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 06:48:51,951 - app.healer_agent - INFO - Memory Healer Agent initialized
+2025-04-16 06:48:51,952 - app.monitor_agent - INFO - Memory monitoring started with interval of 60 seconds
+2025-04-16 06:48:51,953 - app.predictor_agent - INFO - Memory prediction service started with interval of 300 seconds
+2025-04-16 06:48:51,955 - app.healer_agent - INFO - Memory healing service started with interval of 120 seconds
+2025-04-16 06:48:51,957 - __main__ - INFO - All agents started successfully
+2025-04-16 06:48:51,958 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.mistral.ai:443
+2025-04-16 06:48:51,959 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.mistral.ai:443
+2025-04-16 06:48:51,967 - app.rag_pipeline - INFO - Loaded 2 memory events
+2025-04-16 06:48:51,969 - app.rag_pipeline - INFO - Loaded 5 predictions
+2025-04-16 06:48:51,992 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.83:5000
+2025-04-16 06:48:51,992 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-04-16 06:48:56,750 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:48:56] "GET / HTTP/1.1" 200 -
+2025-04-16 06:48:57,393 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:48:57] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:48:57,397 - web_interface - ERROR - Error getting memory logs: The current Flask app is not registered with this 'SQLAlchemy' instance. Did you forget to call 'init_app', or did you create multiple 'SQLAlchemy' instances?
+2025-04-16 06:48:57,398 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:48:57] "GET /api/logs/memory?limit=20 HTTP/1.1" 200 -
+2025-04-16 06:49:00,793 - urllib3.connectionpool - DEBUG - https://api.mistral.ai:443 "POST /v1/chat/completions HTTP/1.1" 200 None
+2025-04-16 06:49:00,793 - app.monitor_agent - WARNING - Could not parse LLM response as JSON, using basic analysis
+2025-04-16 06:49:00,793 - app.rag_pipeline - DEBUG - Memory event added
+2025-04-16 06:49:01,141 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:01] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:01,646 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:01] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:01,799 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:01] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:01,954 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:01] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:02,106 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:02] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:02,260 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:02] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:02,442 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:02] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:02,548 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:02] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:02,674 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:02] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:02,812 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:02] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:02,942 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:02] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:03,079 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:03] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:03,215 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:03] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:03,325 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:03] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:03,541 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:03] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:03,899 - urllib3.connectionpool - DEBUG - https://api.mistral.ai:443 "POST /v1/chat/completions HTTP/1.1" 200 None
+2025-04-16 06:49:03,906 - app.predictor_agent - WARNING - Could not parse LLM response as JSON, using basic prediction
+2025-04-16 06:49:05,277 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:05] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:06,869 - web_interface - ERROR - Error predicting memory: The current Flask app is not registered with this 'SQLAlchemy' instance. Did you forget to call 'init_app', or did you create multiple 'SQLAlchemy' instances?
+2025-04-16 06:49:06,873 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:06] "POST /api/memory/predict HTTP/1.1" 200 -
+2025-04-16 06:49:07,338 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:07] "POST /api/memory/simulate HTTP/1.1" 200 -
+2025-04-16 06:49:07,389 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:07] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:07,561 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:07] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:08,632 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:08] "POST /api/memory/analyze HTTP/1.1" 200 -
+2025-04-16 06:49:10,285 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:10] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:11,165 - web_interface - ERROR - Error predicting memory: The current Flask app is not registered with this 'SQLAlchemy' instance. Did you forget to call 'init_app', or did you create multiple 'SQLAlchemy' instances?
+2025-04-16 06:49:11,167 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:11] "POST /api/memory/predict HTTP/1.1" 200 -
+2025-04-16 06:49:15,280 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:15] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:17,753 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:17] "GET / HTTP/1.1" 200 -
+2025-04-16 06:49:17,896 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:17] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:17,901 - web_interface - ERROR - Error getting memory logs: The current Flask app is not registered with this 'SQLAlchemy' instance. Did you forget to call 'init_app', or did you create multiple 'SQLAlchemy' instances?
+2025-04-16 06:49:17,906 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:17] "GET /api/logs/memory?limit=20 HTTP/1.1" 200 -
+2025-04-16 06:49:22,895 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:22] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:23,087 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:23] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:23,217 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:23] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:23,377 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:23] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:23,518 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:23] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:23,685 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:23] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:23,825 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:23] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:23,972 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:23] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:24,199 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:24] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:24,482 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:24] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:26,441 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:26] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:32,226 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:32] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:37,223 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:37] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:42,285 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:42] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:47,226 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:47] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:52,015 - app.rag_pipeline - INFO - Loaded 7 memory events
+2025-04-16 06:49:52,019 - app.rag_pipeline - INFO - Loaded 6 predictions
+2025-04-16 06:49:52,230 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:52] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:49:57,267 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:49:57] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:50:00,798 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.mistral.ai:443
+2025-04-16 06:50:02,234 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:50:02] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:50:07,344 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:50:07] "POST /api/memory/simulate HTTP/1.1" 200 -
+2025-04-16 06:50:07,359 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:50:07] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:50:07,409 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:50:07] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:50:07,464 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:50:07] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:50:09,525 - urllib3.connectionpool - DEBUG - https://api.mistral.ai:443 "POST /v1/chat/completions HTTP/1.1" 200 None
+2025-04-16 06:50:09,531 - app.monitor_agent - WARNING - Could not parse LLM response as JSON, using basic analysis
+2025-04-16 06:50:09,541 - app.rag_pipeline - DEBUG - Memory event added
+2025-04-16 06:50:12,234 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:50:12] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:50:17,248 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:50:17] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:50:21,442 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:50:21] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:50:27,229 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:50:27] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:50:32,219 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:50:32] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:50:37,219 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:50:37] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:50:42,216 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:50:42] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:50:44,657 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:50:44] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:50:47,220 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:50:47] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:50:52,037 - app.rag_pipeline - INFO - Loaded 11 memory events
+2025-04-16 06:50:52,038 - app.rag_pipeline - INFO - Loaded 6 predictions
+2025-04-16 06:50:52,230 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:50:52] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:50:57,224 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:50:57] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:51:02,224 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:51:02] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:51:06,430 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:51:06] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:51:09,547 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.mistral.ai:443
+2025-04-16 06:51:11,444 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:51:11] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:51:17,271 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:51:17] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:51:18,017 - urllib3.connectionpool - DEBUG - https://api.mistral.ai:443 "POST /v1/chat/completions HTTP/1.1" 200 None
+2025-04-16 06:51:18,025 - app.monitor_agent - WARNING - Could not parse LLM response as JSON, using basic analysis
+2025-04-16 06:51:18,031 - app.rag_pipeline - DEBUG - Memory event added
+2025-04-16 06:51:22,213 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:51:22] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:51:27,230 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:51:27] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:51:32,214 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:51:32] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:51:37,219 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:51:37] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:51:42,229 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:51:42] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:51:47,234 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:51:47] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:51:52,057 - app.rag_pipeline - INFO - Loaded 15 memory events
+2025-04-16 06:51:52,059 - app.rag_pipeline - INFO - Loaded 6 predictions
+2025-04-16 06:51:52,217 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:51:52] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:51:57,216 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:51:57] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:52:02,237 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:52:02] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:52:07,349 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:52:07] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:52:12,219 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:52:12] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:52:18,033 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.mistral.ai:443
+2025-04-16 06:52:27,086 - urllib3.connectionpool - DEBUG - https://api.mistral.ai:443 "POST /v1/chat/completions HTTP/1.1" 200 None
+2025-04-16 06:52:27,090 - app.monitor_agent - WARNING - Could not parse LLM response as JSON, using basic analysis
+2025-04-16 06:52:27,091 - app.rag_pipeline - DEBUG - Memory event added
+2025-04-16 06:52:52,077 - app.rag_pipeline - INFO - Loaded 19 memory events
+2025-04-16 06:52:52,078 - app.rag_pipeline - INFO - Loaded 6 predictions
+2025-04-16 06:53:07,230 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:53:07] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:53:27,093 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.mistral.ai:443
+2025-04-16 06:53:35,350 - urllib3.connectionpool - DEBUG - https://api.mistral.ai:443 "POST /v1/chat/completions HTTP/1.1" 200 None
+2025-04-16 06:53:35,351 - app.monitor_agent - WARNING - Could not parse LLM response as JSON, using basic analysis
+2025-04-16 06:53:35,352 - app.rag_pipeline - DEBUG - Memory event added
+2025-04-16 06:53:52,101 - app.rag_pipeline - INFO - Loaded 23 memory events
+2025-04-16 06:53:52,101 - app.rag_pipeline - INFO - Loaded 6 predictions
+2025-04-16 06:54:03,909 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.mistral.ai:443
+2025-04-16 06:54:07,283 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:54:07] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:54:11,993 - urllib3.connectionpool - DEBUG - https://api.mistral.ai:443 "POST /v1/chat/completions HTTP/1.1" 200 None
+2025-04-16 06:54:11,994 - app.predictor_agent - WARNING - Could not parse LLM response as JSON, using basic prediction
+2025-04-16 06:54:35,355 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.mistral.ai:443
+2025-04-16 06:54:43,929 - urllib3.connectionpool - DEBUG - https://api.mistral.ai:443 "POST /v1/chat/completions HTTP/1.1" 200 None
+2025-04-16 06:54:43,931 - app.monitor_agent - WARNING - Could not parse LLM response as JSON, using basic analysis
+2025-04-16 06:54:43,932 - app.rag_pipeline - DEBUG - Memory event added
+2025-04-16 06:54:52,121 - app.rag_pipeline - INFO - Loaded 27 memory events
+2025-04-16 06:54:52,122 - app.rag_pipeline - INFO - Loaded 7 predictions
+2025-04-16 06:55:07,243 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:55:07] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:55:43,934 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.mistral.ai:443
+2025-04-16 06:55:52,178 - app.rag_pipeline - INFO - Loaded 29 memory events
+2025-04-16 06:55:52,178 - app.rag_pipeline - INFO - Loaded 7 predictions
+2025-04-16 06:55:52,403 - urllib3.connectionpool - DEBUG - https://api.mistral.ai:443 "POST /v1/chat/completions HTTP/1.1" 200 None
+2025-04-16 06:55:52,406 - app.monitor_agent - WARNING - Could not parse LLM response as JSON, using basic analysis
+2025-04-16 06:55:52,407 - app.rag_pipeline - DEBUG - Memory event added
+2025-04-16 06:56:07,249 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:56:07] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:56:52,200 - app.rag_pipeline - INFO - Loaded 33 memory events
+2025-04-16 06:56:52,201 - app.rag_pipeline - INFO - Loaded 7 predictions
+2025-04-16 06:56:52,408 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.mistral.ai:443
+2025-04-16 06:56:58,898 - urllib3.connectionpool - DEBUG - https://api.mistral.ai:443 "POST /v1/chat/completions HTTP/1.1" 200 None
+2025-04-16 06:56:58,902 - app.monitor_agent - WARNING - Could not parse LLM response as JSON, using basic analysis
+2025-04-16 06:56:58,904 - app.rag_pipeline - DEBUG - Memory event added
+2025-04-16 06:57:07,269 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:57:07] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:57:52,219 - app.rag_pipeline - INFO - Loaded 37 memory events
+2025-04-16 06:57:52,219 - app.rag_pipeline - INFO - Loaded 7 predictions
+2025-04-16 06:57:58,906 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.mistral.ai:443
+2025-04-16 06:58:06,731 - urllib3.connectionpool - DEBUG - https://api.mistral.ai:443 "POST /v1/chat/completions HTTP/1.1" 200 None
+2025-04-16 06:58:06,734 - app.monitor_agent - WARNING - Could not parse LLM response as JSON, using basic analysis
+2025-04-16 06:58:06,734 - app.rag_pipeline - DEBUG - Memory event added
+2025-04-16 06:58:07,280 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:58:07] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:58:52,242 - app.rag_pipeline - INFO - Loaded 41 memory events
+2025-04-16 06:58:52,243 - app.rag_pipeline - INFO - Loaded 7 predictions
+2025-04-16 06:59:06,737 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.mistral.ai:443
+2025-04-16 06:59:07,269 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 06:59:07] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 06:59:11,217 - urllib3.connectionpool - DEBUG - https://api.mistral.ai:443 "POST /v1/chat/completions HTTP/1.1" 200 None
+2025-04-16 06:59:11,221 - app.rag_pipeline - DEBUG - Memory event added
+2025-04-16 06:59:11,997 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.mistral.ai:443
+2025-04-16 06:59:19,621 - urllib3.connectionpool - DEBUG - https://api.mistral.ai:443 "POST /v1/chat/completions HTTP/1.1" 200 None
+2025-04-16 06:59:19,625 - app.predictor_agent - WARNING - Could not parse LLM response as JSON, using basic prediction
+2025-04-16 06:59:52,266 - app.rag_pipeline - INFO - Loaded 45 memory events
+2025-04-16 06:59:52,268 - app.rag_pipeline - INFO - Loaded 8 predictions
+2025-04-16 07:00:07,244 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 07:00:07] "GET /api/memory/current HTTP/1.1" 200 -
+2025-04-16 07:00:11,222 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.mistral.ai:443

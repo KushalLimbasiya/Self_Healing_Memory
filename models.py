@@ -2,7 +2,6 @@ from datetime import datetime
 import json
 from sqlalchemy.dialects.postgresql import JSONB
 
-# Database instance is imported from app package
 from app import db
 
 class MemoryEvent(db.Model):

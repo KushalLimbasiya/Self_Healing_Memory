@@ -26,14 +26,14 @@ class MemoryHealerAgent:
         self.rag_pipeline = rag_pipeline
         self.running = False
         self.healer_thread = None
-        self.healing_interval = 120  # Default healing check interval in seconds (2 minutes)
+        self.healing_interval = 120
         self.llm_processor = LLMProcessor(
             model="mistral",
             api_key=os.environ.get("MISTRAL_API_KEY_HEALER"),
             cache_dir="data/healer_cache"
         )
         self.healing_history = []
-        self.max_history_size = 100  # Maximum size of healing history to keep in memory
+        self.max_history_size = 100 
         logger.info("Memory Healer Agent initialized")
         
     def start_healing_service(self, interval=120):
@@ -67,28 +67,20 @@ class MemoryHealerAgent:
         """Main healing loop that runs in a separate thread."""
         while self.running:
             try:
-                # Get current memory statistics
                 memory_stats = get_memory_stats()
                 
-                # Check if healing is needed
                 if self._should_execute_healing(memory_stats):
-                    # Generate healing plan
                     healing_plan = self.generate_healing_plan(memory_stats)
                     
-                    # Execute healing actions if available
                     if healing_plan and 'actions' in healing_plan and healing_plan['actions']:
                         results = self.execute_actions(healing_plan['actions'])
                         
-                        # Validate healing effectiveness
                         validation = self.validate_healing_results(results)
                         
-                        # Log the healing event
                         self._log_healing_event(memory_stats, healing_plan, results, validation)
                         
-                        # Add to in-memory history
                         self._add_to_healing_history(memory_stats, healing_plan, results, validation)
                 
-                # Sleep until next check
                 time.sleep(self.healing_interval)
                     
             except Exception as e:
@@ -107,11 +99,9 @@ class MemoryHealerAgent:
         """
         used_percent = memory_stats.get('used_percent', 0)
         
-        # Simple rule: execute healing when memory usage is above 80%
         if used_percent > 80:
             return True
             
-        # Check if there's a critical prediction from the predictor agent
         if self.rag_pipeline:
             recent_predictions = self.rag_pipeline.get_recent_predictions(limit=1)
             if recent_predictions:
@@ -134,18 +124,15 @@ class MemoryHealerAgent:
             Dictionary containing the healing plan
         """
         try:
-            # Basic healing plan without LLM
             healing_plan = {
                 'timestamp': datetime.now().isoformat(),
                 'memory_usage': memory_stats.get('used_percent', 0),
                 'actions': []
             }
             
-            # Add basic actions based on memory usage
             used_percent = memory_stats.get('used_percent', 0)
             
             if used_percent > 95:
-                # Critical memory condition
                 healing_plan['severity'] = 'critical'
                 healing_plan['actions'].append({
                     'action_type': 'clear_cache',
@@ -158,7 +145,6 @@ class MemoryHealerAgent:
                     'priority': 'high'
                 })
             elif used_percent > 85:
-                # High memory condition
                 healing_plan['severity'] = 'high'
                 healing_plan['actions'].append({
                     'action_type': 'clear_cache',
@@ -166,7 +152,6 @@ class MemoryHealerAgent:
                     'priority': 'medium'
                 })
             elif used_percent > 75:
-                # Moderate memory condition
                 healing_plan['severity'] = 'moderate'
                 healing_plan['actions'].append({
                     'action_type': 'optimize',
@@ -174,20 +159,16 @@ class MemoryHealerAgent:
                     'priority': 'low'
                 })
                 
-            # Enhance healing plan with LLM if available
             if self.llm_processor and self.rag_pipeline:
                 historical_context = self.rag_pipeline.get_relevant_memory_events(memory_stats)
                 healing_history = self.get_healing_history(limit=10)
                 
                 enhanced_plan = self._llm_enhanced_plan(memory_stats, historical_context, healing_history)
                 
-                # Merge the enhanced plan with the basic one
                 if enhanced_plan:
-                    # Replace actions with enhanced ones if available
                     if 'actions' in enhanced_plan and enhanced_plan['actions']:
                         healing_plan['actions'] = enhanced_plan['actions']
                     
-                    # Add any other fields from the enhanced plan
                     for key, value in enhanced_plan.items():
                         if key != 'actions' and value:
                             healing_plan[key] = value
@@ -196,7 +177,6 @@ class MemoryHealerAgent:
                 
         except Exception as e:
             logger.error(f"Error generating healing plan: {str(e)}")
-            # Return basic healing plan in case of error
             return {
                 'timestamp': datetime.now().isoformat(),
                 'error': str(e),
@@ -235,30 +215,24 @@ class MemoryHealerAgent:
                 }
                 
                 try:
-                    # Execute action based on type
                     if action_type == 'clear_cache':
                         success = release_memory_cache()
                         action_result['success'] = success
                         action_result['details'] = 'Memory cache cleared successfully' if success else 'Failed to clear memory cache'
                         
                     elif action_type == 'defragment':
-                        # For this example, we'll simulate defragmentation
-                        # In a real scenario, this would call a memory defragmentation function
                         logger.info("Simulating memory defragmentation")
-                        time.sleep(2)  # Simulate defragmentation time
+                        time.sleep(2) 
                         action_result['success'] = True
                         action_result['details'] = 'Memory defragmentation completed'
                         
                     elif action_type == 'optimize':
-                        # Simulate memory optimization
                         logger.info("Simulating memory optimization")
-                        time.sleep(1)  # Simulate optimization time
+                        time.sleep(1)  
                         action_result['success'] = True
                         action_result['details'] = 'Memory optimization completed'
                         
                     elif action_type == 'custom_command' and 'command' in action:
-                        # Execute custom command if provided and allowed
-                        # Note: This is potentially dangerous and should be limited to trusted commands
                         command = action.get('command')
                         allowed_commands = ['sync', 'echo 3 > /proc/sys/vm/drop_caches']
                         
@@ -279,11 +253,9 @@ class MemoryHealerAgent:
                 
                 results['executed_actions'].append(action_result)
                 
-                # Update overall success
                 if not action_result['success']:
                     results['success'] = False
             
-            # Get memory statistics after execution
             results['memory_after'] = get_memory_stats()
             results['memory_change'] = {
                 'before_percent': results['memory_before'].get('used_percent', 0),
@@ -317,12 +289,10 @@ class MemoryHealerAgent:
         }
         
         try:
-            # Get memory change
             before_percent = results.get('memory_before', {}).get('used_percent', 0)
             after_percent = results.get('memory_after', {}).get('used_percent', 0)
             difference = before_percent - after_percent
             
-            # Evaluate effectiveness
             if difference > 10:
                 validation['effective'] = True
                 validation['effectiveness_score'] = 0.9
@@ -391,7 +361,6 @@ class MemoryHealerAgent:
             'effectiveness_score': validation.get('effectiveness_score', 0.0)
         }
         
-        # Add to history and trim if needed
         self.healing_history.append(event)
         if len(self.healing_history) > self.max_history_size:
             self.healing_history = self.healing_history[-self.max_history_size:]
@@ -423,9 +392,8 @@ class MemoryHealerAgent:
             Enhanced healing plan from the LLM
         """
         try:
-            # Prepare a simplified version of the inputs to keep prompt size manageable
             simplified_history = []
-            for event in historical_context[-5:]:  # Use only the most recent 5 events
+            for event in historical_context[-5:]:  
                 simplified_event = {
                     'timestamp': event.get('timestamp', ''),
                     'used_percent': event.get('stats', {}).get('used_percent', 0),
@@ -433,9 +401,8 @@ class MemoryHealerAgent:
                 }
                 simplified_history.append(simplified_event)
             
-            # Simplified healing history
             simplified_healing = []
-            for event in healing_history[-5:]:  # Use only the most recent 5 healing events
+            for event in healing_history[-5:]:  
                 simplified_healing.append({
                     'timestamp': event.get('timestamp', ''),
                     'actions': event.get('actions', []),
@@ -476,9 +443,7 @@ class MemoryHealerAgent:
             
             response = self.llm_processor.process(prompt)
             
-            # Extract JSON from the response
             try:
-                # Find JSON block in response (in case the LLM added other text)
                 json_str = response
                 if "```json" in response:
                     json_str = response.split("```json")[1].split("```")[0].strip()
@@ -487,22 +452,17 @@ class MemoryHealerAgent:
                     
                 enhanced_plan = json.loads(json_str)
                 
-                # Validate the plan to ensure safety
                 if 'actions' in enhanced_plan:
                     safe_actions = []
                     for action in enhanced_plan['actions']:
-                        # Make sure action type is valid
                         if action.get('action_type') in ['clear_cache', 'defragment', 'optimize', 'custom_command']:
-                            # For custom commands, ensure they're in the allowed list
                             if action.get('action_type') == 'custom_command' and 'command' in action:
                                 command = action.get('command')
                                 allowed_commands = ['sync', 'echo 3 > /proc/sys/vm/drop_caches']
                                 if command not in allowed_commands:
-                                    # Skip this action if command is not allowed
                                     continue
                             safe_actions.append(action)
                     
-                    # Replace actions with safe ones
                     enhanced_plan['actions'] = safe_actions
                 
                 return enhanced_plan

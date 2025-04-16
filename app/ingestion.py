@@ -26,7 +26,6 @@ class LogIngestionSystem:
         self.running = False
         self.ingestion_thread = None
         
-        # Ensure data directory exists
         if not os.path.exists("data"):
             os.makedirs("data")
             
@@ -57,19 +56,14 @@ class LogIngestionSystem:
         """Main ingestion loop that runs in a separate thread."""
         while self.running:
             try:
-                # Get memory statistics
                 memory_stats = get_memory_stats()
                 
-                # Add timestamp
                 memory_event = {
                     "timestamp": datetime.now().isoformat(),
                     "stats": memory_stats
                 }
-                
-                # Write to log file
                 self._write_memory_event(memory_event)
                 
-                # Sleep until next ingestion
                 time.sleep(self.interval)
                     
             except Exception as e:

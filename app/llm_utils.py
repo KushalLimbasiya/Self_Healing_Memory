@@ -28,7 +28,6 @@ class LLMProcessor:
         self.cache_dir = cache_dir
         self.cache_ttl = cache_ttl
         
-        # Create cache directory if specified and doesn't exist
         if self.cache_dir and not os.path.exists(self.cache_dir):
             os.makedirs(self.cache_dir)
             
@@ -47,21 +46,18 @@ class LLMProcessor:
         Returns:
             Model response text
         """
-        # Check cache if enabled
         if use_cache and self.cache_dir:
             cached_response = self._get_from_cache(prompt, temperature, max_tokens)
             if cached_response:
                 logger.debug("Returning response from cache")
                 return cached_response
         
-        # Process with the appropriate model
         if self.model.lower() == "mistral":
             response = self._process_with_mistral(prompt, temperature, max_tokens)
         else:
             logger.error(f"Unsupported model: {self.model}")
             response = f"Error: Unsupported model {self.model}"
             
-        # Cache the response if caching is enabled
         if use_cache and self.cache_dir and response:
             self._save_to_cache(prompt, temperature, max_tokens, response)
             
@@ -91,7 +87,7 @@ class LLMProcessor:
             }
             
             payload = {
-                "model": "mistral-medium",  # Default model
+                "model": "mistral-medium",  
                 "messages": [{"role": "user", "content": prompt}],
                 "temperature": temperature,
                 "max_tokens": max_tokens
@@ -158,7 +154,6 @@ class LLMProcessor:
             with open(cache_file, "r") as f:
                 cache_data = json.load(f)
                 
-            # Check if cache is expired
             timestamp = datetime.fromisoformat(cache_data.get("timestamp", "2000-01-01T00:00:00"))
             if datetime.now() - timestamp > timedelta(seconds=self.cache_ttl):
                 logger.debug(f"Cache expired for key: {cache_key}")

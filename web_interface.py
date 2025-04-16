@@ -11,8 +11,11 @@ from app.memory_core import get_memory_stats, simulate_memory_usage
 from app import create_app, db
 from models import MemoryEvent, MemoryPrediction, HealingEvent
 
-# Create Flask app
-app = create_app()
+# Create Flask app with SQLAlchemy configuration
+app = create_app({
+    'SQLALCHEMY_DATABASE_URI': 'sqlite:///data/memory_system.db',
+    'SQLALCHEMY_TRACK_MODIFICATIONS': False
+})
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -89,31 +92,29 @@ def get_memory_history():
         logger.error(f"Error getting memory history: {str(e)}")
         return jsonify(success=False, error=str(e))
 
+disable_db = os.environ.get("DISABLE_DATABASE", "").lower() == "true"
+
 @app.route('/api/memory/analyze', methods=['POST'])
 def analyze_memory():
     """API endpoint to analyze current memory conditions."""
     try:
-        # Make sure agents are initialized
         initialize_agents()
         
-        # Get memory statistics
         stats = get_memory_stats()
         
-        # Perform analysis
         analysis = monitor_agent.analyze_memory_conditions(stats)
         
-        # Save to database
-        with app.app_context():
-            # Create a new memory event
-            memory_event = MemoryEvent(
-                stats=stats,
-                analysis=analysis
-            )
-            db.session.add(memory_event)
-            db.session.commit()
-            logger.info(f"Saved memory event to database: id={memory_event.id}")
+        if not disable_db:
+            with app.app_context():
+                # Create a new memory event
+                memory_event = MemoryEvent(
+                    stats=stats,
+                    analysis=analysis
+                )
+                db.session.add(memory_event)
+                db.session.commit()
+                logger.info(f"Saved memory event to database: id={memory_event.id}")
         
-        # Also save to file for backward compatibility
         with open('data/memory_events.jsonl', 'a') as f:
             f.write(json.dumps({
                 'timestamp': datetime.now().isoformat(),
@@ -130,25 +131,18 @@ def analyze_memory():
 def predict_memory():
     """API endpoint to predict future memory conditions."""
     try:
-        # Make sure agents are initialized
         initialize_agents()
         
-        # Get memory statistics
         stats = get_memory_stats()
         
-        # Load recent events from database
         recent_events = []
         with app.app_context():
-            # Get the 20 most recent memory events
             db_events = MemoryEvent.query.order_by(MemoryEvent.timestamp.desc()).limit(20).all()
             recent_events = [event.to_dict() for event in db_events]
         
-        # Generate prediction
         prediction = predictor_agent.predict_memory_condition(stats, recent_events)
         
-        # Save prediction to database
         with app.app_context():
-            # Create a new memory prediction
             memory_prediction = MemoryPrediction(
                 current_memory_used=stats.get('used_percent', 0),
                 predicted_memory_usage_1h=prediction.get('predicted_usage_1h', None),
@@ -159,7 +153,6 @@ def predict_memory():
             db.session.commit()
             logger.info(f"Saved memory prediction to database: id={memory_prediction.id}")
         
-        # Also save to file for backward compatibility
         with open('data/memory_predictions.jsonl', 'a') as f:
             f.write(json.dumps({
                 'timestamp': datetime.now().isoformat(),
@@ -176,16 +169,11 @@ def predict_memory():
 def heal_memory():
     """API endpoint to execute healing actions."""
     try:
-        # Make sure agents are initialized
         initialize_agents()
         
-        # Get memory statistics
         stats = get_memory_stats()
         
-        # Generate healing plan
         healing_plan = healer_agent.generate_healing_plan(stats)
-        
-        # Execute actions if requested
         execute = request.json.get('execute', False)
         results = None
         validation = None
@@ -194,7 +182,6 @@ def heal_memory():
             results = healer_agent.execute_actions(healing_plan['actions'])
             validation = healer_agent.validate_healing_results(results)
             
-            # Save healing event to database
             with app.app_context():
                 healing_event = HealingEvent(
                     memory_stats=stats,
@@ -206,7 +193,6 @@ def heal_memory():
                 db.session.commit()
                 logger.info(f"Saved healing event to database: id={healing_event.id}")
             
-            # Also save to file for backward compatibility
             with open('data/healing_events.jsonl', 'a') as f:
                 f.write(json.dumps({
                     'timestamp': datetime.now().isoformat(),
@@ -232,13 +218,10 @@ def heal_memory():
 def simulate_memory():
     """API endpoint to simulate memory usage for testing."""
     try:
-        # Get parameters
         usage_mb = request.json.get('usage_mb', 100)
         
-        # Limit to reasonable values
         usage_mb = max(10, min(500, usage_mb))
         
-        # Run simulation in a separate thread to avoid blocking
         def run_simulation():
             try:
                 simulate_memory_usage(usage_mb)
@@ -264,12 +247,10 @@ def get_memory_logs():
         limit = int(request.args.get('limit', 20))
         logs = []
         
-        # Get events from database
         with app.app_context():
             db_events = MemoryEvent.query.order_by(MemoryEvent.timestamp.desc()).limit(limit).all()
             logs = [event.to_dict() for event in db_events]
         
-        # Fallback to file if no database records
         if not logs and os.path.exists('data/memory_events.jsonl'):
             with open('data/memory_events.jsonl', 'r') as f:
                 lines = f.readlines()
@@ -288,12 +269,10 @@ def get_healing_logs():
         limit = int(request.args.get('limit', 20))
         logs = []
         
-        # Get events from database
         with app.app_context():
             db_events = HealingEvent.query.order_by(HealingEvent.timestamp.desc()).limit(limit).all()
             logs = [event.to_dict() for event in db_events]
         
-        # Fallback to file if no database records
         if not logs and os.path.exists('data/healing_events.jsonl'):
             with open('data/healing_events.jsonl', 'r') as f:
                 lines = f.readlines()
@@ -312,12 +291,10 @@ def get_prediction_logs():
         limit = int(request.args.get('limit', 20))
         logs = []
         
-        # Get predictions from database
         with app.app_context():
             db_predictions = MemoryPrediction.query.order_by(MemoryPrediction.timestamp.desc()).limit(limit).all()
             logs = [prediction.to_dict() for prediction in db_predictions]
         
-        # Fallback to file if no database records
         if not logs and os.path.exists('data/memory_predictions.jsonl'):
             with open('data/memory_predictions.jsonl', 'r') as f:
                 lines = f.readlines()

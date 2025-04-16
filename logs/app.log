@@ -1,0 +1,54 @@
+2025-04-14 00:39:28,577 - app.memory_core - WARNING - Rust library not found at /home/runner/workspace/target/release/libmemory_core.so, using Python fallback
+2025-04-14 00:40:48,042 - app.memory_core - WARNING - Rust library not found at /home/runner/workspace/target/release/libmemory_core.so, using Python fallback
+2025-04-14 00:41:03,347 - app.memory_core - WARNING - Rust library not found at /home/runner/workspace/target/release/libmemory_core.so, using Python fallback
+2025-04-14 00:41:03,444 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-14 00:41:03,444 - app.monitor_agent - INFO - Memory Monitor Agent initialized
+2025-04-14 00:41:03,444 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-14 00:41:03,444 - app.predictor_agent - INFO - Memory Predictor Agent initialized
+2025-04-14 00:41:03,444 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-14 00:41:03,445 - app.healer_agent - INFO - Memory Healer Agent initialized
+2025-04-14 00:41:03,445 - web_interface - INFO - Web interface agent references initialized
+2025-04-14 00:41:39,425 - app.memory_core - WARNING - Rust library not found at /home/runner/workspace/target/release/libmemory_core.so, using Python fallback
+2025-04-14 00:41:39,508 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-14 00:41:39,508 - app.monitor_agent - INFO - Memory Monitor Agent initialized
+2025-04-14 00:41:39,508 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-14 00:41:39,509 - app.predictor_agent - INFO - Memory Predictor Agent initialized
+2025-04-14 00:41:39,509 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-14 00:41:39,509 - app.healer_agent - INFO - Memory Healer Agent initialized
+2025-04-14 00:41:39,509 - web_interface - INFO - Web interface agent references initialized
+2025-04-14 00:45:30,500 - app.llm_utils - ERROR - Mistral API key not provided
+2025-04-14 00:45:30,500 - app.predictor_agent - WARNING - Could not parse LLM response as JSON, using basic prediction
+2025-04-14 00:46:14,150 - app.llm_utils - ERROR - Mistral API key not provided
+2025-04-14 00:46:14,153 - app.predictor_agent - WARNING - Could not parse LLM response as JSON, using basic prediction
+2025-04-14 01:07:59,090 - app.memory_core - WARNING - Rust library not found at /home/runner/workspace/target/release/libmemory_core.so, using Python fallback
+2025-04-14 01:07:59,188 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-14 01:07:59,189 - app.monitor_agent - INFO - Memory Monitor Agent initialized
+2025-04-14 01:07:59,189 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-14 01:07:59,189 - app.predictor_agent - INFO - Memory Predictor Agent initialized
+2025-04-14 01:07:59,189 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-14 01:07:59,189 - app.healer_agent - INFO - Memory Healer Agent initialized
+2025-04-14 01:07:59,189 - web_interface - INFO - Web interface agent references initialized
+2025-04-14 01:11:51,049 - app.llm_utils - ERROR - Mistral API key not provided
+2025-04-14 01:11:51,050 - app.predictor_agent - WARNING - Could not parse LLM response as JSON, using basic prediction
+2025-04-14 01:12:10,221 - app.llm_utils - ERROR - Mistral API key not provided
+2025-04-14 01:12:10,222 - app.predictor_agent - WARNING - Could not parse LLM response as JSON, using basic prediction
+2025-04-14 01:14:05,806 - app.llm_utils - ERROR - Mistral API key not provided
+2025-04-14 01:14:05,806 - app.predictor_agent - WARNING - Could not parse LLM response as JSON, using basic prediction
+2025-04-14 01:14:39,813 - app.llm_utils - ERROR - Mistral API key not provided
+2025-04-14 01:14:39,813 - app.predictor_agent - WARNING - Could not parse LLM response as JSON, using basic prediction
+2025-04-16 00:27:01,309 - app.memory_core - WARNING - Rust library not found at /home/runner/workspace/target/release/libmemory_core.so, using Python fallback
+2025-04-16 00:27:01,487 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:27:01,487 - app.monitor_agent - INFO - Memory Monitor Agent initialized
+2025-04-16 00:27:01,487 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:27:01,487 - app.predictor_agent - INFO - Memory Predictor Agent initialized
+2025-04-16 00:27:01,488 - app.llm_utils - INFO - LLM Processor initialized with model: mistral
+2025-04-16 00:27:01,488 - app.healer_agent - INFO - Memory Healer Agent initialized
+2025-04-16 00:27:01,488 - web_interface - INFO - Web interface agent references initialized
+2025-04-16 00:27:29,605 - app.llm_utils - ERROR - Mistral API key not provided
+2025-04-16 00:27:29,606 - app.predictor_agent - WARNING - Could not parse LLM response as JSON, using basic prediction
+2025-04-16 00:27:54,785 - app.llm_utils - ERROR - Mistral API key not provided
+2025-04-16 00:27:54,785 - app.predictor_agent - WARNING - Could not parse LLM response as JSON, using basic prediction
+2025-04-16 00:28:50,827 - app.llm_utils - ERROR - Mistral API key not provided
+2025-04-16 00:28:50,828 - app.predictor_agent - WARNING - Could not parse LLM response as JSON, using basic prediction
+2025-04-16 00:53:42,679 - app.llm_utils - ERROR - Mistral API key not provided
+2025-04-16 00:53:42,680 - app.predictor_agent - WARNING - Could not parse LLM response as JSON, using basic prediction
