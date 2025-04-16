@@ -45,13 +45,18 @@ with app.app_context():
 
 @app.route('/')
 def index():
-    """Render the dashboard page."""
-    return render_template('index.html')
+    """Render the main dashboard page."""
+    return render_template('grafana_dashboard.html')
 
 @app.route('/dashboard')
 def dashboard():
-    """Render the dashboard page."""
+    """Render the main dashboard page."""
     return render_template('grafana_dashboard.html')
+
+@app.route('/legacy')
+def legacy_dashboard():
+    """Render the legacy dashboard page."""
+    return render_template('index.html')
 
 @app.route('/api/memory/current')
 def get_current_memory():
@@ -97,6 +102,25 @@ def analyze_memory():
         # Perform analysis
         analysis = monitor_agent.analyze_memory_conditions(stats)
         
+        # Save to database
+        with app.app_context():
+            # Create a new memory event
+            memory_event = MemoryEvent(
+                stats=stats,
+                analysis=analysis
+            )
+            db.session.add(memory_event)
+            db.session.commit()
+            logger.info(f"Saved memory event to database: id={memory_event.id}")
+        
+        # Also save to file for backward compatibility
+        with open('data/memory_events.jsonl', 'a') as f:
+            f.write(json.dumps({
+                'timestamp': datetime.now().isoformat(),
+                'stats': stats,
+                'analysis': analysis
+            }) + '\n')
+        
         return jsonify(success=True, stats=stats, analysis=analysis)
     except Exception as e:
         logger.error(f"Error analyzing memory: {str(e)}")
@@ -112,16 +136,36 @@ def predict_memory():
         # Get memory statistics
         stats = get_memory_stats()
         
-        # Load recent events
+        # Load recent events from database
         recent_events = []
-        if os.path.exists('data/memory_events.jsonl'):
-            with open('data/memory_events.jsonl', 'r') as f:
-                lines = f.readlines()
-                for line in lines[-20:]:  # Get last 20 events
-                    recent_events.append(json.loads(line.strip()))
+        with app.app_context():
+            # Get the 20 most recent memory events
+            db_events = MemoryEvent.query.order_by(MemoryEvent.timestamp.desc()).limit(20).all()
+            recent_events = [event.to_dict() for event in db_events]
         
         # Generate prediction
         prediction = predictor_agent.predict_memory_condition(stats, recent_events)
+        
+        # Save prediction to database
+        with app.app_context():
+            # Create a new memory prediction
+            memory_prediction = MemoryPrediction(
+                current_memory_used=stats.get('used_percent', 0),
+                predicted_memory_usage_1h=prediction.get('predicted_usage_1h', None),
+                predicted_memory_usage_24h=prediction.get('predicted_usage_24h', None),
+                predicted_issues=prediction.get('potential_issues', [])
+            )
+            db.session.add(memory_prediction)
+            db.session.commit()
+            logger.info(f"Saved memory prediction to database: id={memory_prediction.id}")
+        
+        # Also save to file for backward compatibility
+        with open('data/memory_predictions.jsonl', 'a') as f:
+            f.write(json.dumps({
+                'timestamp': datetime.now().isoformat(),
+                'stats': stats,
+                'prediction': prediction
+            }) + '\n')
         
         return jsonify(success=True, stats=stats, prediction=prediction)
     except Exception as e:
@@ -149,6 +193,28 @@ def heal_memory():
         if execute and healing_plan and 'actions' in healing_plan and healing_plan['actions']:
             results = healer_agent.execute_actions(healing_plan['actions'])
             validation = healer_agent.validate_healing_results(results)
+            
+            # Save healing event to database
+            with app.app_context():
+                healing_event = HealingEvent(
+                    memory_stats=stats,
+                    healing_plan=healing_plan,
+                    results=results,
+                    validation=validation
+                )
+                db.session.add(healing_event)
+                db.session.commit()
+                logger.info(f"Saved healing event to database: id={healing_event.id}")
+            
+            # Also save to file for backward compatibility
+            with open('data/healing_events.jsonl', 'a') as f:
+                f.write(json.dumps({
+                    'timestamp': datetime.now().isoformat(),
+                    'memory_stats': stats,
+                    'healing_plan': healing_plan,
+                    'results': results,
+                    'validation': validation
+                }) + '\n')
         
         return jsonify(
             success=True, 
@@ -198,7 +264,13 @@ def get_memory_logs():
         limit = int(request.args.get('limit', 20))
         logs = []
         
-        if os.path.exists('data/memory_events.jsonl'):
+        # Get events from database
+        with app.app_context():
+            db_events = MemoryEvent.query.order_by(MemoryEvent.timestamp.desc()).limit(limit).all()
+            logs = [event.to_dict() for event in db_events]
+        
+        # Fallback to file if no database records
+        if not logs and os.path.exists('data/memory_events.jsonl'):
             with open('data/memory_events.jsonl', 'r') as f:
                 lines = f.readlines()
                 for line in lines[-limit:]:
@@ -216,7 +288,13 @@ def get_healing_logs():
         limit = int(request.args.get('limit', 20))
         logs = []
         
-        if os.path.exists('data/healing_events.jsonl'):
+        # Get events from database
+        with app.app_context():
+            db_events = HealingEvent.query.order_by(HealingEvent.timestamp.desc()).limit(limit).all()
+            logs = [event.to_dict() for event in db_events]
+        
+        # Fallback to file if no database records
+        if not logs and os.path.exists('data/healing_events.jsonl'):
             with open('data/healing_events.jsonl', 'r') as f:
                 lines = f.readlines()
                 for line in lines[-limit:]:
@@ -234,7 +312,13 @@ def get_prediction_logs():
         limit = int(request.args.get('limit', 20))
         logs = []
         
-        if os.path.exists('data/memory_predictions.jsonl'):
+        # Get predictions from database
+        with app.app_context():
+            db_predictions = MemoryPrediction.query.order_by(MemoryPrediction.timestamp.desc()).limit(limit).all()
+            logs = [prediction.to_dict() for prediction in db_predictions]
+        
+        # Fallback to file if no database records
+        if not logs and os.path.exists('data/memory_predictions.jsonl'):
             with open('data/memory_predictions.jsonl', 'r') as f:
                 lines = f.readlines()
                 for line in lines[-limit:]:
