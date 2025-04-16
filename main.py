@@ -25,7 +25,6 @@ def ensure_directories():
             logger.info(f"Created directory: {win_dir}")
 
 ensure_directories()
-# Set environment variable to disable SQLAlchemy
 os.environ['DISABLE_DATABASE'] = 'true'
 logger.info("Database functionality disabled")
 

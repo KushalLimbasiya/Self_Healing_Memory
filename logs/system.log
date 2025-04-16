@@ -258,3 +258,6 @@
 2025-04-16 06:59:52,268 - app.rag_pipeline - INFO - Loaded 8 predictions
 2025-04-16 07:00:07,244 - werkzeug - INFO - 192.168.1.83 - - [16/Apr/2025 07:00:07] "GET /api/memory/current HTTP/1.1" 200 -
 2025-04-16 07:00:11,222 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.mistral.ai:443
+2025-04-16 07:00:22,508 - urllib3.connectionpool - DEBUG - https://api.mistral.ai:443 "POST /v1/chat/completions HTTP/1.1" 200 None
+2025-04-16 07:00:22,510 - app.monitor_agent - WARNING - Could not parse LLM response as JSON, using basic analysis
+2025-04-16 07:00:22,511 - app.rag_pipeline - DEBUG - Memory event added
