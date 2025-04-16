@@ -2,27 +2,23 @@ import os
 import logging
 import threading
 import time
+from web_interface import app as application
+
+# Import models needed for web interface
+import models
+
+# For agent instances
 from app.monitor_agent import MemoryMonitorAgent
 from app.predictor_agent import MemoryPredictorAgent
 from app.healer_agent import MemoryHealerAgent
 from app.rag_pipeline import RagPipeline
 from app.ingestion import LogIngestionSystem
-from web_interface import app
-
-# Export the app for Gunicorn to use
-# The variable name must match the one in the Gunicorn command
 
 # Configure logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler("logs/system.log"),
-        logging.StreamHandler()
-    ]
-)
-
 logger = logging.getLogger(__name__)
+
+# Export the app for Gunicorn to use
+app = application
 
 def ensure_directories():
     """Create necessary directories if they don't exist."""

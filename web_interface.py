@@ -3,18 +3,18 @@ import logging
 import json
 from datetime import datetime, timedelta
 import threading
-from flask import Flask, render_template, jsonify, request
+from flask import render_template, jsonify, request, current_app
 from app.monitor_agent import MemoryMonitorAgent
 from app.predictor_agent import MemoryPredictorAgent
 from app.healer_agent import MemoryHealerAgent
 from app.memory_core import get_memory_stats, simulate_memory_usage
+from app import create_app, db
+from models import MemoryEvent, MemoryPrediction, HealingEvent
 
 # Create Flask app
-app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET", "dev_key_replace_in_production")
+app = create_app()
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Global references to agents
