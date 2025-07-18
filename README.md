@@ -1,7 +1,3 @@
-Here’s a well-structured `README.md` for your GitHub project [Self\_Healing\_Memory](https://github.com/KushalLimbasiya/Self_Healing_Memory), assuming your goal is to showcase a **self-healing memory management framework using autonomous LLM agents**.
-
----
-
 ````markdown
 # 🧠 Self-Healing Memory (SHM)
 
@@ -132,7 +128,7 @@ python app.py
 * [x] Feedback-based correction loop
 * [ ] Vector-based memory ranking
 * [ ] Long-term memory persistence
-* [ ] GUI / Dashboard for analysis
+* [x] GUI / Dashboard for analysis
 
 ---
 
@@ -159,8 +155,4 @@ This project is licensed under the MIT License.
 Made with 💻 by [Kushal Limbasiya](https://github.com/KushalLimbasiya)  & [MeettPaladiya](https://github.com/MeettPaladiya)
 
 ---
-
-```
-
-Let me know if you’d like the `README.md` file uploaded as a `.md` file or want sections for diagrams, video demos, or Streamlit integration!
-```
+````
