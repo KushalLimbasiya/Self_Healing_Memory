@@ -1,50 +1,48 @@
-````markdown
-# 🧠 Self-Healing Memory (SHM)
+🧠 Self-Healing Memory (SHM)
+============================
 
 > Autonomous, resilient memory management using LLM agents, RAG pipelines, and real-time feedback correction.
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
-![Status](https://img.shields.io/badge/status-active-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue.svg) ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg) ![Status](https://img.shields.io/badge/status-active-brightgreen)
 
----
+  
 
-## 🔍 Overview
+🔍 Overview
+-----------
 
-**Self-Healing Memory (SHM)** is an experimental framework designed to simulate a cognitive, autonomous memory system for AI agents. Inspired by biological memory, this system can **detect, correct, and evolve its knowledge** using:
+Self-Healing Memory (SHM) is an experimental framework designed to simulate a cognitive, autonomous memory system for AI agents. Inspired by biological memory, this system can detect, correct, and evolve its knowledge using:
 
-- 🧠 LLM Agents (CrewAI)
-- 🔁 Feedback Loops
-- 📚 Retrieval-Augmented Generation (RAG)
-- ⚙️ Modular Task Architecture
-- 💾 Real-time embedded memory
+   🧠 LLM Agents (CrewAI)
+   🔁 Feedback Loops
+   📚 Retrieval-Augmented Generation (RAG)
+   ⚙️ Modular Task Architecture
+   💾 Real-time embedded memory
 
-The system learns from its own **mistakes and feedback**, just like humans — allowing autonomous agents to **self-correct**, **refactor their thoughts**, and **improve task execution** over time.
+The system learns from its own mistakes and feedback, just like humans — allowing autonomous agents to self-correct, refactor their thoughts, and improve task execution over time.
 
----
+  
 
-## 🏗️ System Architecture
+🏗️ System Architecture
+-----------------------
 
-```plaintext
-+------------------------+
-|   User / Task Input    |
-+------------------------+
-            ↓
-+------------------------+
-|   RAG Memory Retriever |
-+------------------------+
-            ↓
-+------------------------+
-|     LLM Agent Crew     |
-| (Monitor, Healer, etc) |
-+------------------------+
-            ↓
-+------------------------+
-|   Output + Feedback    |
-+------------------------+
-            ↺
-(Loop for self-healing logic)
-````
+    +------------------------+
+    |   User / Task Input    |
+    +------------------------+
+                ↓
+    +------------------------+
+    |   RAG Memory Retriever |
+    +------------------------+
+                ↓
+    +------------------------+
+    |     LLM Agent Crew     |
+    | (Monitor, Healer, etc) |
+    +------------------------+
+                ↓
+    +------------------------+
+    |   Output + Feedback    |
+    +------------------------+
+                ↺
+    (Loop for self-healing logic)
 
 ### 🔧 Key Agents
 
@@ -155,4 +153,4 @@ This project is licensed under the MIT License.
 Made with 💻 by [Kushal Limbasiya](https://github.com/KushalLimbasiya)  & [MeettPaladiya](https://github.com/MeettPaladiya)
 
 ---
-````
+
