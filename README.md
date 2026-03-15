@@ -1,55 +1,45 @@
 🧠 Self-Healing Memory (SHM)
 ============================
 
-> Autonomous, resilient memory management using LLM agents, RAG pipelines, and real-time feedback correction.
+> **Autonomous System Memory Management** powered by real-time ML forecasting, Agentic Self-Healing, and Deep Kernel-level Optimization.
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg) ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg) ![Status](https://img.shields.io/badge/status-active-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue.svg) ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg) ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 
-  
+---
 
-🔍 Overview
------------
+## 🔍 Overview
 
-Self-Healing Memory (SHM) is an experimental framework designed to simulate a cognitive, autonomous memory system for AI agents. Inspired by biological memory, this system can detect, correct, and evolve its knowledge using:
+**Self-Healing Memory (SHM)** is a sophisticated monitoring and optimization suite that treats system RAM as a "living" entity. Unlike static cleaners, SHM utilizes isolation forests and exponential smoothing to predict memory exhaustion before it happens, triggering autonomous "healing" actions.
 
-   🧠 LLM Agents (CrewAI)
-   🔁 Feedback Loops
-   📚 Retrieval-Augmented Generation (RAG)
-   ⚙️ Modular Task Architecture
-   💾 Real-time embedded memory
+### ✨ Key Features
 
-The system learns from its own mistakes and feedback, just like humans — allowing autonomous agents to self-correct, refactor their thoughts, and improve task execution over time.
+*   **Flat UI Dashboard**: A high-performance, real-time web interface built with Vanilla JS and Chart.js.
+*   **Predictive ML Engine**: Uses *Holt-Winters Exponential Smoothing* to forecast memory trends up to 6 hours ahead.
+*   **Anomaly Detection**: Employs an *Isolation Forest* model to detect unusual memory spikes or leaks.
+*   **Smart Healing**: A multi-agent system (Monitor, Healer, Predictor) that collaborates to maintain system health.
+*   **Deep Kernel Optimization**: Implements Windows-native `NtSetSystemInformation` and `EmptyWorkingSet` calls to flush standby lists and trim process working sets safely.
 
-  
+---
 
-🏗️ System Architecture
------------------------
+## 🏗️ System Architecture
 
-    +------------------------+
-    |   User / Task Input    |
-    +------------------------+
-                ↓
-    +------------------------+
-    |   RAG Memory Retriever |
-    +------------------------+
-                ↓
-    +------------------------+
-    |     LLM Agent Crew     |
-    | (Monitor, Healer, etc) |
-    +------------------------+
-                ↓
-    +------------------------+
-    |   Output + Feedback    |
-    +------------------------+
-                ↺
-    (Loop for self-healing logic)
+```mermaid
+graph TD
+    A[OS Memory / psutil] --> B[Monitor Agent]
+    B --> C{Decision Engine}
+    C -->|Anomaly Found| D[Healer Agent]
+    C -->|Trend Growing| E[Predictor Agent]
+    D --> F[Deep Kernel Optimization]
+    E --> G[ML Forecasting]
+    F --> H[Dashboard / Real-time Feedback]
+    G --> H
+```
 
-### 🔧 Key Agents
+### 🤖 The Agent Crew
 
-* **MonitorAgent** – Detects faults, memory conflicts, or hallucinations.
-* **HealerAgent** – Corrects inaccurate memory blocks using LLM and context.
-* **PredictorAgent** – Forecasts future issues based on current memory state.
-* **ExplainerAgent** – Explains why a correction was made, ensuring transparency.
+*   **Monitor Agent**: Continuous polling and anomaly flagging.
+*   **Healer Agent**: Executes targeted cleanup based on ML "Brain" success scores.
+*   **Predictor Agent**: Maps out future resource usage to warn users of impending slowdowns.
 
 ---
 
@@ -57,100 +47,73 @@ The system learns from its own mistakes and feedback, just like humans — allow
 
 ```bash
 Self_Healing_Memory/
-├── agents/                # LLM agent logic (CrewAI)
-│   ├── monitor.py
-│   ├── healer.py
-│   └── ...
-├── memory/                # Memory storage, validation & healing
-│   ├── store.py
-│   ├── validator.py
-├── rag/                   # Embedding and retrieval logic
-│   ├── embedder.py
-│   └── retriever.py
-├── feedback/              # Feedback collection and scoring system
-├── app.py                 # Main runner file
-├── requirements.txt
-└── README.md
+├── app/
+│   ├── ml/                # AI Core (Anomaly Detector, Holt-Winters Predictor)
+│   ├── event_store.py     # SQLite persistence for logs and samples
+│   ├── memory_core.py     # Windows-native Kernel API calls (RAM cleaning)
+│   └── monitor_agent.py   # Background thread control logic
+├── static/
+│   ├── css/               # Modern "Flat UI" design system
+│   └── js/                # Modular Chart.js and API logic
+├── templates/
+│   └── dashboard.html     # Main Single Page Application (SPA)
+├── main.py                # Entry point (Bootstrap & Flask Runner)
+├── data/                  # Local persistence (.db files)
+└── logs/                  # System & Agent activity logs
 ```
 
 ---
 
 ## 🚀 Getting Started
 
-### 1. Clone the Repo
+### 1. Prerequisites
+- **Windows OS** (required for Deep Optimization features)
+- **Python 3.10+**
+- **Administrator Privileges** (required to flush system standby lists)
 
-```bash
-git clone https://github.com/KushalLimbasiya/Self_Healing_Memory.git
-cd Self_Healing_Memory
-```
+### 2. Installation
 
-### 2. Install Requirements
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/KushalLimbasiya/Self_Healing_Memory.git
+   cd Self_Healing_Memory
+   ```
 
-```bash
-pip install -r requirements.txt
-```
+2. Install dependencies:
+   ```bash
+   pip install -r pyproject.toml  # or use pip install psutil numpy statsmodels flask
+   ```
 
-### 3. Run the App
+3. Run the application:
+   ```bash
+   python main.py
+   ```
 
-```bash
-python app.py
-```
-
----
-
-## 🧩 Technologies Used
-
-* **Python 3.10+**
-* **CrewAI** – Multi-agent LLM framework
-* **FAISS** / **ChromaDB** – Vector-based memory retrieval
-* **LangChain** (Optional) – For chaining tools (can be replaced)
-* **SentenceTransformers** – For memory embedding
-* **Streamlit** or CLI – For interactive testing (optional)
+4. Open your browser:
+   Visit `http://localhost:5000` to view the **Healer Dashboard**.
 
 ---
 
-## 💡 Use Cases
+## 🛠️ Optimization Methods
 
-* Building self-evolving chatbots
-* Autonomous LLM agents with long-term memory
-* Debugging and healing LLM outputs
-* Cognitive memory simulations
-* Experimenting with memory integrity in AI agents
-
----
-
-## 📈 Roadmap
-
-* [x] Core agent system (Monitor, Healer)
-* [x] Embedded memory with FAISS
-* [x] Feedback-based correction loop
-* [ ] Vector-based memory ranking
-* [ ] Long-term memory persistence
-* [x] GUI / Dashboard for analysis
+| Method | Component | Level | Description |
+| :--- | :--- | :--- | :--- |
+| **Quick Heal** | GC + Local Trim | Application | Performs Garbage Collection and trims the SHM app's own memory. |
+| **Clean RAM** | System-wide Trim | Kernel/OS | Iterates through ALL system processes to trim working sets. |
+| **Force Heal** | Healer Brain | Agentic | The ML Agent chooses the best action based on historical success. |
 
 ---
 
-## 🤝 Contribution
+## 💡 Technologies Used
 
-Feel free to fork and submit pull requests. Suggestions, issues, and discussions are highly welcome.
-
-```bash
-git checkout -b feature-name
-git commit -m "Added something cool"
-git push origin feature-name
-```
+*   **Backend**: Flask (Python)
+*   **ML Stack**: NumPy, Scikit-learn (Isolation Forest), Statsmodels (Holt-Winters)
+*   **Kernel Ops**: `ctypes` (Windows API: `psapi`, `ntdll`)
+*   **Frontend**: Vanilla HTML5/CSS3 (Flat UI), Chart.js
+*   **Agents**: Custom Multi-threaded Agentic Framework
 
 ---
 
-## 📜 License
+## ✍️ Authors
 
-This project is licensed under the MIT License.
-
----
-
-## ✍️ Author
-
-Made with 💻 by [Kushal Limbasiya](https://github.com/KushalLimbasiya)  & [MeettPaladiya](https://github.com/MeettPaladiya)
-
----
-
+Made with 💻 by [Kushal Limbasiya](https://github.com/KushalLimbasiya) & [MeettPaladiya](https://github.com/MeettPaladiya)
