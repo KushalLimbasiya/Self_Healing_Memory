@@ -104,8 +104,10 @@ class MemoryPredictor:
             return "falling"
         return "stable"
 
-    def _clamp(self, val: float) -> float:
-        return round(float(max(0.0, min(100.0, val))), 2)
+    def _clamp(self, val: float, current: float = 0.0) -> float:
+        """Clamp to [0,100] but never predict below current - 25% or below 10%."""
+        floor = max(10.0, current - 25.0)
+        return round(float(max(floor, min(100.0, val))), 2)
 
     def _holt_winters_forecast(self, data: list) -> Dict:
         try:
@@ -125,8 +127,9 @@ class MemoryPredictor:
                 fit = model.fit(optimized=True, disp=False)
 
             forecast_6h = fit.forecast(steps_6h)
-            pred_1h = self._clamp(float(forecast_6h[min(steps_1h - 1, len(forecast_6h) - 1)]))
-            pred_6h = self._clamp(float(forecast_6h[-1]))
+            current = float(data[-1])
+            pred_1h = self._clamp(float(forecast_6h[min(steps_1h - 1, len(forecast_6h) - 1)]), current)
+            pred_6h = self._clamp(float(forecast_6h[-1]), current)
 
             # Confidence: lower if variance is high
             residuals = np.array(fit.resid)
@@ -151,9 +154,12 @@ class MemoryPredictor:
         steps_1h = self._steps_for(1)
         steps_6h = self._steps_for(6)
         n = len(data)
-
-        pred_1h = self._clamp(intercept + slope * (n + steps_1h))
-        pred_6h = self._clamp(intercept + slope * (n + steps_6h))
+        current = float(data[-1])
+        # Cap extrapolation: predict at most ±25% change from current over 6h
+        raw_1h = intercept + slope * (n + steps_1h)
+        raw_6h = intercept + slope * (n + steps_6h)
+        pred_1h = self._clamp(raw_1h, current)
+        pred_6h = self._clamp(raw_6h, current)
 
         r_squared = self._r_squared(data, slope, intercept)
         confidence = round(float(max(0.0, min(1.0, r_squared))), 2)

@@ -1,82 +1,77 @@
-import os
-import logging
-import threading
-import time
+"""
+main.py — Entry point for the Self-Healing Memory system.
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler("logs/system.log", mode='a'),
-        logging.StreamHandler()
-    ]
-)
+Creates all components, injects dependencies, starts agent threads,
+then runs Flask in the main thread.
+"""
+import logging
+import os
+
+# Ensure required directories exist before anything else
+os.makedirs("data",      exist_ok=True)
+os.makedirs("logs",      exist_ok=True)
+os.makedirs("templates", exist_ok=True)
+os.makedirs("static/js", exist_ok=True)
+os.makedirs("static/css", exist_ok=True)
+
+from app             import create_app
+from app             import event_store
+from app.ml.anomaly_detector import AnomalyDetector
+from app.ml.predictor        import MemoryPredictor
+from app.ml.healer_brain     import HealerBrain
+from app.monitor_agent       import MonitorAgent
+from app.predictor_agent     import PredictorAgent
+from app.healer_agent        import HealerAgent
+
 logger = logging.getLogger(__name__)
 
-def ensure_directories():
-    """Create necessary directories if they don't exist."""
-    dirs = ["logs", "data", "data/vector_store", "data/monitor_cache", 
-            "data/predictor_cache", "data/healer_cache"]
-    
-    for directory in dirs:
-        win_dir = directory.replace('/', '\\')
-        if not os.path.exists(win_dir):
-            os.makedirs(win_dir)
-            logger.info(f"Created directory: {win_dir}")
 
-ensure_directories()
-os.environ['DISABLE_DATABASE'] = 'true'
-logger.info("Database functionality disabled")
+def build_system():
+    """Instantiate and wire all components. Returns (app, agents_dict)."""
 
-from web_interface import app as application
-import models
+    # 1. DB
+    event_store.init_db()
 
-from app.monitor_agent import MemoryMonitorAgent
-from app.predictor_agent import MemoryPredictorAgent
-from app.healer_agent import MemoryHealerAgent
-from app.rag_pipeline import RagPipeline
-from app.ingestion import LogIngestionSystem
+    # 2. ML modules (shared across agents — single instances)
+    detector  = AnomalyDetector(event_store=event_store)
+    predictor = MemoryPredictor(poll_interval_seconds=10, event_store=event_store)
+    brain     = HealerBrain(event_store)
 
-app = application
+    # 3. Agents (dependency-injected)
+    monitor   = MonitorAgent(event_store, detector, predictor)
+    pred_agent = PredictorAgent(event_store, predictor)
+    healer    = HealerAgent(event_store, brain)
 
-def start_agents():
-    """Initialize and start memory management agents."""
-    try:
-        ingestion = LogIngestionSystem()
-        ingestion.start()
-        
-        rag = RagPipeline()
-        
-        monitor = MemoryMonitorAgent(rag)
-        predictor = MemoryPredictorAgent(rag)
-        healer = MemoryHealerAgent(rag)
-        
-        monitor.start_monitoring()
-        predictor.start_prediction_service()
-        healer.start_healing_service()
-        
-        logger.info("All agents started successfully")
-        
-        return monitor, predictor, healer, ingestion
-    except Exception as e:
-        logger.error(f"Failed to start agents: {str(e)}")
-        raise
+    agents = {
+        "monitor":   monitor,
+        "predictor": pred_agent,
+        "healer":    healer,
+        "detector":  detector,
+        "brain":     brain,
+        "ml_predictor": predictor,
+    }
 
-def main():
-    """Main entry point for the self-healing memory system."""
-    logger.info("Starting Self-Healing Memory System")
-    
-    agents = start_agents()
-    
-    flask_thread = threading.Thread(target=lambda: app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False))
-    flask_thread.daemon = True
-    flask_thread.start()
-    
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        logger.info("Shutting down Self-Healing Memory System")
-        
+    # 4. Flask app
+    flask_app = create_app()
+
+    # 5. Register routes (import here to avoid circular imports)
+    from web_interface import register_routes
+    register_routes(flask_app, agents)
+
+    return flask_app, agents
+
+
 if __name__ == "__main__":
-    main()
+    app, agents = build_system()
+
+    # Start agent background threads
+    agents["monitor"].start()
+    agents["predictor"].start()
+    agents["healer"].start()
+    logger.info("All agents started")
+
+    # Flask runs in main thread
+    port = int(os.environ.get("PORT", 5000))
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    logger.info("Starting Flask on port %d", port)
+    app.run(host="0.0.0.0", port=port, debug=debug, use_reloader=False)

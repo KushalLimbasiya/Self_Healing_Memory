@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Self-Healing Memory</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/css/dashboard.css?v=11">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <span class="logo-icon">SHM</span>
+            <h1>Self-Healing Memory</h1>
+        </div>
+        
+        <nav class="nav-links">
+            <a href="#" class="nav-link active" data-target="dashboard-view">
+                <span class="icon">📊</span> Dashboard
+            </a>
+            <a href="#" class="nav-link" data-target="predictions-view">
+                <span class="icon">📈</span> Predictions
+            </a>
+            <a href="#" class="nav-link" data-target="healing-view">
+                <span class="icon">🔧</span> Healing Log
+            </a>
+            <a href="#" class="nav-link" data-target="ml-view">
+                <span class="icon">🤖</span> ML Engine
+            </a>
+        </nav>
+        
+        <div class="live-ram-badge">
+            <div class="ram-header">
+                <span class="pulse-dot" id="live-pulse"></span>
+                <span class="ram-title">Live RAM</span>
+            </div>
+            <div class="ram-value" id="sidebar-ram-percent">--% used</div>
+            <div class="ram-bar-container">
+                <div class="ram-bar-fill" id="sidebar-ram-fill" style="width: 0%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <main class="content">
+        <!-- PAGE 1: DASHBOARD -->
+        <section id="dashboard-view" class="view active">
+            <div class="header-row" style="padding:0.5rem 0;">
+                <div class="header-actions" style="margin-left: auto;">
+                    <button id="theme-toggle" class="btn btn-primary" style="margin-right: 1rem; padding: 0.4rem 0.8rem;">🌓 Theme</button>
+                    <div class="agent-pills">
+                        <div class="pill" id="pill-monitor" style="cursor:pointer" onclick="document.querySelector('[data-target=\'dashboard-view\']').click()"><span class="pill-dot"></span>Monitor</div>
+                        <div class="pill" id="pill-predictor" style="cursor:pointer" onclick="document.querySelector('[data-target=\'predictions-view\']').click()"><span class="pill-dot"></span>Predictor</div>
+                        <div class="pill" id="pill-healer" style="cursor:pointer" onclick="document.querySelector('[data-target=\'healing-view\']').click()"><span class="pill-dot"></span>Healer</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <!-- Total RAM -->
+                <div class="metric-card m-total">
+                    <svg class="metric-icon-bg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect></svg>
+                    <div class="metric-header">
+                        <span class="metric-label">Total RAM</span>
+                        <span class="trend-badge">✓</span>
+                    </div>
+                    <div class="metric-value-row">
+                        <div class="metric-value" id="dash-total-ram">-- GB</div>
+                    </div>
+                </div>
+
+                <!-- RAM Used % -->
+                <div class="metric-card m-used">
+                    <svg class="metric-icon-bg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v10l5.5 5.5"></path></svg>
+                    <div class="metric-header">
+                        <span class="metric-label">RAM Used %</span>
+                        <span class="trend-badge">↑ 12%</span>
+                    </div>
+                    <div class="metric-value-row">
+                        <div class="metric-value" id="dash-used-pct">--%</div>
+                    </div>
+                </div>
+
+                <!-- Free RAM -->
+                <div class="metric-card m-free">
+                    <svg class="metric-icon-bg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    <div class="metric-header">
+                        <span class="metric-label">Free RAM</span>
+                        <span class="trend-badge">↓ 5%</span>
+                    </div>
+                    <div class="metric-value-row">
+                        <div class="metric-value" id="dash-free-ram">-- GB</div>
+                    </div>
+                </div>
+
+                <!-- Swap Used -->
+                <div class="metric-card m-swap">
+                    <svg class="metric-icon-bg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="14" x2="21" y2="3"></line><polyline points="8 21 3 21 3 16"></polyline><line x1="20" y1="10" x2="3" y2="21"></line></svg>
+                    <div class="metric-header">
+                        <span class="metric-label">Swap Used</span>
+                        <span class="trend-badge">-</span>
+                    </div>
+                    <div class="metric-value-row">
+                        <div class="metric-value" id="dash-swap-pct">--%</div>
+                    </div>
+                </div>
+
+                <!-- CPU Usage -->
+                <div class="metric-card m-cpu" id="cpu-card">
+                    <svg class="metric-icon-bg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    <div class="metric-header">
+                        <span class="metric-label">CPU Usage</span>
+                        <span class="trend-badge">↑ 2%</span>
+                    </div>
+                    <div class="metric-value-row">
+                        <div class="metric-value" id="dash-cpu-pct">--%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CSS Grid Layout -->
+            <div class="dashboard-grid">
+
+                <!-- ── ROW 1 ─────────────────────────────── -->
+                
+                <!-- System Health Overview -->
+                <div class="card col-span-4" style="display:flex;flex-direction:column;justify-content:space-between;">
+                    <h3>System Health Overview</h3>
+                    <div class="health-grid">
+                        <!-- Score ring (compact) -->
+                        <div class="health-score-wrap">
+                            <svg class="health-ring" viewBox="0 0 110 110">
+                                <circle cx="55" cy="55" r="44" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="11"/>
+                                <circle id="health-ring-arc" cx="55" cy="55" r="44" fill="none"
+                                    stroke="var(--green)" stroke-width="11"
+                                    stroke-linecap="round"
+                                    stroke-dasharray="276.46 276.46"
+                                    stroke-dashoffset="276.46"/>
+                            </svg>
+                            <div class="health-score-label">
+                                <span id="health-score-val" style="font-size:1.1rem;">--</span>
+                                <small style="font-size:0.65rem;">Health</small>
+                            </div>
+                        </div>
+
+                        <!-- Stats grid -->
+                        <div class="health-stats">
+                            <div class="hstat">
+                                <span class="hstat-label">Memory Pressure</span>
+                                <span class="hstat-val status-good" id="h-pressure">--</span>
+                            </div>
+                            <div class="hstat">
+                                <span class="hstat-label">CPU Load</span>
+                                <span class="hstat-val status-warn" id="h-cpu">--</span>
+                            </div>
+                            <div class="hstat">
+                                <span class="hstat-label">Anomalies</span>
+                                <span class="hstat-val status-danger" id="h-anomalies">--</span>
+                            </div>
+                            <div class="hstat">
+                                <span class="hstat-label">Swap Usage</span>
+                                <span class="hstat-val status-warn" id="h-swap">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Memory usage breakdown bar -->
+                    <div style="margin-top:0.5rem">
+                        <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-bottom:0.4rem">
+                            <span>Memory Distribution</span>
+                            <span id="mem-bar-label">-- / -- GB</span>
+                        </div>
+                        <div class="mem-breakdown-track">
+                            <div id="mem-used-fill"  class="mem-fill mem-fill-used"  style="width:0%"></div>
+                            <div id="mem-cache-fill" class="mem-fill mem-fill-cache" style="width:0%"></div>
+                        </div>
+                        <div class="mem-legend">
+                            <span class="mem-legend-dot used"></span><span>Used</span>
+                            <span class="mem-legend-dot avail"></span><span>Available (Standby)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real-Time Memory Usage -->
+                <div class="card chart-card col-span-8">
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:0.5rem;">
+                        <h3>Real-Time Memory Usage</h3>
+                        <div style="display:flex; gap:0.3rem; flex-wrap:wrap; justify-content:flex-end;">
+                            <button onclick="setChartRange('live')" id="range-live" class="chart-range-btn active">Live</button>
+                            <button onclick="setChartRange('1m')"   id="range-1m"   class="chart-range-btn">1m</button>
+                            <button onclick="setChartRange('5m')"   id="range-5m"   class="chart-range-btn">5m</button>
+                            <button onclick="setChartRange('10m')"  id="range-10m"  class="chart-range-btn">10m</button>
+                            <button onclick="setChartRange('30m')"  id="range-30m"  class="chart-range-btn">30m</button>
+                            <button onclick="setChartRange('1h')"   id="range-1h"   class="chart-range-btn">1h</button>
+                            <button onclick="setChartRange('3h')"   id="range-3h"   class="chart-range-btn">3h</button>
+                        </div>
+                    </div>
+                    <div class="chart-container" style="height:230px">
+                        <canvas id="memoryChart"></canvas>
+                    </div>
+                </div>
+
+
+                <!-- ── ROW 2 ─────────────────────────────── -->
+
+                <!-- Optimizer Panel -->
+                <div class="card optimizer-card col-span-4" style="display:flex;flex-direction:column;">
+                    <h3 style="margin-bottom:0.3rem">🧹 Memory Optimizer</h3>
+                    <p class="opt-desc" style="margin-bottom:0.3rem;font-size:0.78rem">Trim working sets & Standby Cache</p>
+
+                    <!-- Last run result -->
+                    <div class="opt-result" id="opt-result" style="display:none">
+                        <div class="opt-stat-row"><span>Freed</span><span class="opt-stat-val green" id="opt-freed">--</span></div>
+                        <div class="opt-stat-row"><span>Processes trimmed</span><span class="opt-stat-val" id="opt-trimmed">--</span></div>
+                        <div class="opt-stat-row"><span>Standby flushed</span><span class="opt-stat-val" id="opt-standby">--</span></div>
+                        <div class="opt-stat-row"><span>Before → After</span><span class="opt-stat-val" id="opt-before-after" style="font-size:0.82rem">-- MB</span></div>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div class="opt-actions">
+                        <button class="btn-opt" id="btn-deep-optimize">
+                            <span class="opt-icon">⚡</span>
+                            <div>
+                                <div class="opt-btn-title">Clean RAM</div>
+                                <div class="opt-btn-sub">Trim all process working sets + flush standby</div>
+                            </div>
+                        </button>
+                        <button class="btn-opt btn-opt-soft" id="btn-quick-heal">
+                            <span class="opt-icon">♻️</span>
+                            <div>
+                                <div class="opt-btn-title">Quick Heal</div>
+                                <div class="opt-btn-sub">Python GC + own-process trim</div>
+                            </div>
+                        </button>
+                        <button class="btn-opt" id="btn-manual-heal" style="background:rgba(46, 204, 113, 0.15); color:var(--green);">
+                            <span class="opt-icon">🛠️</span>
+                            <div>
+                                <div class="opt-btn-title">Force Heal Now</div>
+                                <div class="opt-btn-sub">Trigger ML healer immediately</div>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="opt-spinner" id="opt-spinner" style="display:none">⚙️ Optimizing…</div>
+                </div>
+
+                <!-- Memory Logs (mini timeline) -->
+                <div class="card col-span-4" style="display:flex;flex-direction:column;">
+                    <h3>Memory Logs</h3>
+                    <div id="mini-heal-log" class="mini-heal-log" style="flex:1;overflow-y:auto">
+                        <div class="text-muted" style="text-align:center;padding:1rem;font-size:0.82rem">Loading…</div>
+                    </div>
+                </div>
+
+                <!-- Top Memory Logs (compact bar list) -->
+                <div class="card col-span-4" style="display:flex;flex-direction:column;">
+                    <h3>Top Memory Logs
+                        <span class="text-muted" style="font-size:0.75rem;font-weight:400"> — live, top 8</span>
+                    </h3>
+                    <div id="proc-list" class="proc-list" style="flex:1;overflow-y:auto">
+                        <div class="text-muted" style="text-align:center;padding:1rem">Loading…</div>
+                    </div>
+                </div>
+
+                <!-- ── BELOW THE FOLD ─────────────────────── -->
+
+                <!-- Recent Anomalies -->
+                <div class="card table-card col-span-12" style="display:flex;flex-direction:column;min-height:300px;margin-top:1rem;">
+                    <h3>Recent Anomalies <span class="badge" id="anomaly-badge">0</span></h3>
+                    <div class="table-wrapper" style="flex:1;overflow-y:auto">
+                        <table class="data-table">
+                            <thead><tr>
+                                <th>Timestamp</th><th>Usage %</th><th>Severity</th><th>Method</th>
+                            </tr></thead>
+                            <tbody id="anomalies-tbody">
+                                <tr><td colspan="4" class="text-center">No recent anomalies</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- PAGE 2: PREDICTIONS -->
+        <section id="predictions-view" class="view">
+            <div class="header-row">
+                <h2>Memory Forecast</h2>
+                <span style="font-size:0.82rem; color:var(--text-muted);">Powered by ML Predictor · updates every 30s</span>
+            </div>
+
+            <!-- Row 1: 6 Live Stat Cards -->
+            <div class="dashboard-grid" style="margin-bottom:1rem; flex-shrink:0;">
+                <div class="card col-span-2" style="padding:0.85rem 1rem;">
+                    <div style="font-size:0.7rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.05em; margin-bottom:0.3rem;">Current RAM</div>
+                    <div style="font-size:1.35rem; font-weight:600;" id="f-current-pct">--%</div>
+                </div>
+                <div class="card col-span-2" style="padding:0.85rem 1rem;">
+                    <div style="font-size:0.7rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.05em; margin-bottom:0.3rem;">Trend</div>
+                    <div style="font-size:1.1rem; font-weight:700;" id="forecast-trend">--</div>
+                </div>
+                <div class="card col-span-2" style="padding:0.85rem 1rem;">
+                    <div style="font-size:0.7rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.05em; margin-bottom:0.3rem;">Active Engine</div>
+                    <div style="font-size:0.95rem; font-weight:600; color:var(--accent);" id="forecast-method">--</div>
+                </div>
+                <div class="card col-span-2" style="padding:0.85rem 1rem;">
+                    <div style="font-size:0.7rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.05em; margin-bottom:0.3rem;">Confidence</div>
+                    <div style="font-size:1.35rem; font-weight:600;" id="forecast-confidence">--%</div>
+                    <div style="height:3px; background:var(--bg-border); border-radius:2px; margin-top:0.35rem;">
+                        <div id="forecast-confidence-fill" style="height:100%; width:0%; border-radius:2px; background:var(--green); transition:width 0.4s;"></div>
+                    </div>
+                </div>
+                <div class="card col-span-2" style="padding:0.85rem 1rem;">
+                    <div style="font-size:0.7rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.05em; margin-bottom:0.3rem;">Est. Critical</div>
+                    <div style="font-size:1.1rem; font-weight:600; font-family:var(--font-mono);" id="forecast-eta">--</div>
+                </div>
+                <div class="card col-span-2" style="padding:0.85rem 1rem;">
+                    <div style="font-size:0.7rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.05em; margin-bottom:0.3rem;">Risk Level</div>
+                    <div style="font-size:1.1rem; font-weight:700;" id="f-risk-level">--</div>
+                </div>
+            </div>
+
+            <!-- Row 2: Chart + Snapshots + Model Details -->
+            <div class="dashboard-grid">
+
+                <!-- LEFT: Chart + Risk Breakdown -->
+                <div class="col-span-8" style="display:flex; flex-direction:column; gap:1.5rem;">
+                    <div class="card chart-card" style="margin-bottom:0;">
+                        <h3>Prediction Timeline
+                            <span style="font-size:0.78rem; color:var(--text-muted); font-weight:400; margin-left:0.5rem;">— grey: history · red dashed: forecast</span>
+                        </h3>
+                        <div class="chart-container" style="height:280px;">
+                            <canvas id="forecastChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Risk Assessment Row -->
+                    <div class="card" style="padding:1rem 1.25rem; flex-shrink:0;">
+                        <h3 class="card-subtitle">Memory Risk Assessment</h3>
+                        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:0.75rem;">
+                            <div>
+                                <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:0.25rem;">Pressure</div>
+                                <div style="font-size:0.9rem; font-weight:600;" id="f-pressure">--</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:0.25rem;">1h Delta</div>
+                                <div style="font-size:0.9rem; font-weight:600; font-family:var(--font-mono);" id="f-delta-1h">--</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:0.25rem;">6h Delta</div>
+                                <div style="font-size:0.9rem; font-weight:600; font-family:var(--font-mono);" id="f-delta-6h">--</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:0.25rem;">Heal Recommended</div>
+                                <div style="font-size:0.9rem; font-weight:600;" id="f-heal-rec">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Snapshots + Model Meta -->
+                <div class="col-span-4" style="display:flex; flex-direction:column; gap:1.5rem;">
+
+                    <!-- Forecast Snapshots — 3 intervals -->
+                    <div class="card" style="padding:1.1rem;">
+                        <h3 class="card-subtitle">Forecast Snapshots</h3>
+                        <div style="display:flex; flex-direction:column; gap:0.6rem;">
+                            <div style="background:var(--bg-card-hover); padding:0.8rem; border-radius:10px; border:1px solid var(--bg-border);">
+                                <div style="color:var(--text-muted); font-size:0.72rem; text-transform:uppercase; font-weight:600; margin-bottom:0.3rem;">In 1 Hour (T+60)</div>
+                                <div style="display:flex; align-items:baseline; gap:0.4rem;">
+                                    <span style="font-size:1.4rem; font-weight:700;" id="forecast-1h">--%</span>
+                                    <span style="color:var(--text-muted); font-size:0.82rem;" id="forecast-1h-mb"></span>
+                                </div>
+                                <div style="height:3px; background:var(--bg-border); border-radius:2px; margin-top:0.4rem;">
+                                    <div id="f-bar-1h" style="height:100%; width:0%; background:var(--accent); border-radius:2px; transition:width 0.5s;"></div>
+                                </div>
+                            </div>
+                            <div style="background:var(--bg-card-hover); padding:0.8rem; border-radius:10px; border:1px solid var(--bg-border);">
+                                <div style="color:var(--text-muted); font-size:0.72rem; text-transform:uppercase; font-weight:600; margin-bottom:0.3rem;">In 3 Hours (T+180)</div>
+                                <div style="display:flex; align-items:baseline; gap:0.4rem;">
+                                    <span style="font-size:1.4rem; font-weight:700;" id="forecast-3h">--%</span>
+                                    <span style="color:var(--text-muted); font-size:0.82rem;" id="forecast-3h-mb"></span>
+                                </div>
+                                <div style="height:3px; background:var(--bg-border); border-radius:2px; margin-top:0.4rem;">
+                                    <div id="f-bar-3h" style="height:100%; width:0%; background:var(--yellow); border-radius:2px; transition:width 0.5s;"></div>
+                                </div>
+                            </div>
+                            <div style="background:var(--bg-card-hover); padding:0.8rem; border-radius:10px; border:1px solid var(--bg-border);">
+                                <div style="color:var(--text-muted); font-size:0.72rem; text-transform:uppercase; font-weight:600; margin-bottom:0.3rem;">In 6 Hours (T+360)</div>
+                                <div style="display:flex; align-items:baseline; gap:0.4rem;">
+                                    <span style="font-size:1.4rem; font-weight:700;" id="forecast-6h">--%</span>
+                                    <span style="color:var(--text-muted); font-size:0.82rem;" id="forecast-6h-mb"></span>
+                                </div>
+                                <div style="height:3px; background:var(--bg-border); border-radius:2px; margin-top:0.4rem;">
+                                    <div id="f-bar-6h" style="height:100%; width:0%; background:var(--red); border-radius:2px; transition:width 0.5s;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Model Metadata Card -->
+                    <div class="card" style="padding:1rem 1.1rem; flex-shrink:0;">
+                        <h3 class="card-subtitle">Model Details</h3>
+                        <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.82rem;">
+                            <div style="display:flex; justify-content:space-between; padding:0.3rem 0; border-bottom:1px solid rgba(255,255,255,0.04);">
+                                <span style="color:var(--text-muted);">Algorithm</span>
+                                <span id="f-model-algo" style="font-weight:500;">--</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; padding:0.3rem 0; border-bottom:1px solid rgba(255,255,255,0.04);">
+                                <span style="color:var(--text-muted);">Sample Buffer</span>
+                                <span id="f-model-samples" style="font-family:var(--font-mono);">200 / 200</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; padding:0.3rem 0; border-bottom:1px solid rgba(255,255,255,0.04);">
+                                <span style="color:var(--text-muted);">Seasonal Period</span>
+                                <span style="font-family:var(--font-mono);">24 cycles</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; padding:0.3rem 0;">
+                                <span style="color:var(--text-muted);">Forecast Horizon</span>
+                                <span style="font-family:var(--font-mono);">6 hours</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- PAGE 3: HEALING LOG -->
+        <section id="healing-view" class="view">
+            <div class="header-row">
+                <h2>Healing Timeline</h2>
+                <div style="display:flex; gap:0.6rem; align-items:center;">
+                    <!-- Auto-Heal Toggle -->
+                    <button id="btn-autoheal-toggle" onclick="toggleAutoHeal()"
+                        style="display:flex; align-items:center; gap:0.5rem; padding:0.5rem 1rem;
+                               border-radius:8px; border:1px solid rgba(63,185,80,0.4); background:rgba(63,185,80,0.08);
+                               color:var(--green); cursor:pointer; font-size:0.85rem; font-weight:600; transition:all 0.2s;">
+                        <span id="autoheal-icon">🟢</span>
+                        <span id="autoheal-label">Auto-Heal: ON</span>
+                    </button>
+                    <button class="btn btn-primary" id="btn-trigger-heal" style="display:flex; align-items:center; gap:0.5rem;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        Force Manual Heal
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-bottom: 2rem;">
+                <h3>Healing Summary</h3>
+                <div class="dashboard-grid">
+                    <div class="col-span-3">
+                        <div class="ml-stat-label" style="text-transform:uppercase; font-size:0.8rem; margin-bottom:0.4rem;">Total Heals Validated</div>
+                        <div class="metric-value" id="healing-total-count">--</div>
+                    </div>
+                    <div class="col-span-3">
+                        <div class="ml-stat-label" style="text-transform:uppercase; font-size:0.8rem; margin-bottom:0.4rem;">Total MB Freed</div>
+                        <div class="metric-value" id="healing-total-mb">-- MB</div>
+                    </div>
+                    <div class="col-span-3">
+                        <div class="ml-stat-label" style="text-transform:uppercase; font-size:0.8rem; margin-bottom:0.4rem;">Success Rate</div>
+                        <div class="metric-value" id="healing-success-rate">100%</div>
+                    </div>
+                    <div class="col-span-3">
+                        <div class="ml-stat-label" style="text-transform:uppercase; font-size:0.8rem; margin-bottom:0.4rem;">Active Strategy</div>
+                        <div class="method-tag" style="margin-top:0;">ML-Driven Multi-Tier</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="padding:0; overflow:hidden;">
+                <h3 style="padding:1.5rem; margin-bottom:0;">Event History</h3>
+                <div style="overflow-x:auto;">
+                    <table class="data-table" style="width:100%; text-align:left; border-collapse:collapse;">
+                        <thead>
+                            <tr>
+                                <th style="padding:1rem 1.5rem;">Timestamp</th>
+                                <th style="padding:1rem 1.5rem;">Trigger</th>
+                                <th style="padding:1rem 1.5rem;">Actions Executed</th>
+                                <th style="padding:1rem 1.5rem;">Memory Freed</th>
+                                <th style="padding:1rem 1.5rem;">Actions Taken</th>
+                                <th style="padding:1rem 1.5rem;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="main-heal-log">
+                            <tr><td colspan="6" style="padding:2rem; text-align:center; color:var(--text-muted);">Loading healing history...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 4: ML ENGINE -->
+        <section id="ml-view" class="view">
+            <div class="header-row">
+                <h2>ML Engine</h2>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card ml-card border-accent col-span-6" style="padding: 1.5rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                        <h3 style="margin:0; border:none; padding:0;">Anomaly Detector</h3>
+                        <span class="badge" style="background:rgba(88,166,255,0.1); color:var(--accent);">Isolation Forest</span>
+                    </div>
+                    
+                    <div style="background:var(--bg-card-hover); border-radius:12px; padding:1rem; border:1px solid var(--bg-border); margin-bottom:1.5rem;">
+                        <div class="ml-stat-row" style="margin-bottom:0.5rem; border:none; padding:0;">
+                            <span class="ml-stat-label">System State:</span>
+                            <span class="ml-stat-value" id="ml-detector-status" style="color:var(--green)">--</span>
+                        </div>
+                        <div class="ml-stat-row" style="margin-bottom:0.5rem; border:none; padding:0;">
+                            <span class="ml-stat-label">Training Samples:</span>
+                            <span class="ml-stat-value" id="ml-detector-samples">--</span>
+                        </div>
+                    </div>
+
+                    <h3 class="card-subtitle">Hyperparameters</h3>
+                    <div class="ml-stat-row">
+                        <span class="ml-stat-label">Contamination Expected:</span>
+                        <span class="ml-stat-value">5% (auto)</span>
+                    </div>
+                    <div class="ml-stat-row">
+                        <span class="ml-stat-label">Feature Dimensions:</span>
+                        <span class="ml-stat-value">4 (CPU, RAM, Page, IO)</span>
+                    </div>
+
+                    <!-- Live Anomaly Chart -->
+                    <div style="margin-top:1.25rem;">
+                        <div style="font-size:0.78rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.05em; margin-bottom:0.5rem;">Live Anomaly Scan — RAM usage · 🔴 anomalies flagged</div>
+                        <div style="height:120px; position:relative;">
+                            <canvas id="anomaly-chart"></canvas>
+                        </div>
+                        <div style="display:flex; gap:1rem; margin-top:0.4rem; font-size:0.72rem; color:var(--text-muted);">
+                            <span>🔵 Normal</span>
+                            <span>🔴 Anomaly</span>
+                            <span id="anomaly-count-label" style="margin-left:auto;">-- detected</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card ml-card border-accent col-span-6" style="padding: 1.5rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                        <h3 style="margin:0; border:none; padding:0;">Predictor Engine</h3>
+                        <span class="badge" style="background:rgba(88,166,255,0.1); color:var(--accent);">Holt-Winters</span>
+                    </div>
+                    
+                    <div style="background:var(--bg-card-hover); border-radius:12px; padding:1rem; border:1px solid var(--bg-border); margin-bottom:1.5rem;">
+                        <div class="ml-stat-row" style="margin-bottom:0.5rem; border:none; padding:0;">
+                            <span class="ml-stat-label">Engine Ready:</span>
+                            <span class="ml-stat-value" id="ml-predictor-status" style="color:var(--green)">--</span>
+                        </div>
+                        <div class="ml-stat-row" style="margin-bottom:0.5rem; border:none; padding:0;">
+                            <span class="ml-stat-label">Buffer Capacity:</span>
+                            <span class="ml-stat-value" id="ml-predictor-samples">-- / 200</span>
+                        </div>
+                    </div>
+
+                    <h3 class="card-subtitle">Hyperparameters</h3>
+                    <div class="ml-stat-row">
+                        <span class="ml-stat-label">Trend Component:</span>
+                        <span class="ml-stat-value">Additive</span>
+                    </div>
+                    <div class="ml-stat-row">
+                        <span class="ml-stat-label">Seasonal Periods:</span>
+                        <span class="ml-stat-value" id="ml-predictor-min">12 (Dynamic)</span>
+                    </div>
+
+                    <!-- Live Predictor Chart -->
+                    <div style="margin-top:1.25rem;">
+                        <div style="font-size:0.78rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.05em; margin-bottom:0.5rem;">Predictor Buffer — observed · 🔵 1h · 🟡 6h forecast</div>
+                        <div style="height:120px; position:relative;">
+                            <canvas id="predictor-chart"></canvas>
+                        </div>
+                        <div style="display:flex; gap:1rem; margin-top:0.4rem; font-size:0.72rem; color:var(--text-muted);">
+                            <span style="color:rgba(139,148,158,0.8);">⬛ Observed</span>
+                            <span style="color:#58a6ff;">🔵 +1h</span>
+                            <span style="color:#f0a500;">🟡 +6h</span>
+                            <span id="predictor-buffer-label" style="margin-left:auto;">-- / 200 samples</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4 table-card" style="margin-top:2rem;">
+                <h3>HealerBrain Strategy Scoreboard <span class="text-muted" style="font-weight:400; font-size:0.9rem;">(Q-Learning Feedback)</span></h3>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Healing Action</th>
+                                <th>Effectiveness Score</th>
+                                <th>Times Used</th>
+                                <th>Avg Memory Freed</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scoreboard-tbody">
+                            <tr><td colspan="4" class="text-center">Loading scoreboard...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" style="position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999; display:flex; flex-direction:column; gap:0.6rem;"></div>
+
+    <!-- Scripts -->
+    <script src="/static/js/memory-chart.js?v=2"></script>
+    <script src="/static/js/forecast-chart.js?v=2"></script>
+    <script src="/static/js/healing-timeline.js?v=2"></script>
+    <script src="/static/js/ml-scoreboard.js?v=2"></script>
+    <script src="/static/js/ml-engine-charts.js?v=2"></script>
+    <script src="/static/js/processes.js?v=2"></script>
+    
+    <!-- Main UI Controller -->
+    <script>
+        // Navigation Handlers
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Remove active classes
+                document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                // Add active to current
+                link.classList.add('active');
+                const targetId = link.dataset.target;
+                document.getElementById(targetId).classList.add('active');
+                
+                // Trigger resize so Chart.js fits the new container if needed
+                window.dispatchEvent(new Event('resize'));
+                
+                // Trigger view-specific data loading
+                if (targetId === 'healing-view' && typeof window.refreshHealingTimeline === 'function') {
+                    window.refreshHealingTimeline();
+                }
+                if (targetId === 'predictions-view' && typeof window.initForecastChart === 'function') {
+                    window.initForecastChart();
+                }
+                if (targetId === 'ml-view' && typeof window.initMLScoreboard === 'function') {
+                    window.initMLScoreboard();
+                }
+                if (targetId === 'ml-view' && typeof window.initMLEngineCharts === 'function') {
+                    window.initMLEngineCharts();
+                }
+            });
+        });
+
+        // Theme Toggle
+        const themeBtn = document.getElementById('theme-toggle');
+        themeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('theme-light');
+            const isLight = document.body.classList.contains('theme-light');
+            localStorage.setItem('shm-theme', isLight ? 'light' : 'dark');
+            themeBtn.textContent = isLight ? '🌙 Theme' : '🌓 Theme';
+            
+            // Trigger chart resize / update to draw new colors if needed
+            if (typeof window.initMemoryChart === 'function' && window.memoryChartInstance) {
+                 // optionally update chart axes colors for light mode
+            }
+        });
+        
+        // Initial Theme Load
+        if (localStorage.getItem('shm-theme') === 'light') {
+            document.body.classList.add('theme-light');
+            themeBtn.textContent = '🌙 Theme';
+        }
+
+        // Setup API Poller
+        const fetchData = async () => {
+            try {
+                const currentRes = await fetch('/api/memory/current');
+                const currentData = await currentRes.json();
+                
+                // Update UI elements
+                updateDashboard(currentData);
+                
+                // Optionally update charts if we are on those tabs
+                if (typeof window.updateMemoryChart === 'function') {
+                    window.updateMemoryChart(currentData);
+                }
+            } catch (err) {
+                console.error('Core polling error:', err);
+                document.getElementById('live-pulse').style.backgroundColor = 'var(--red)';
+            }
+        };
+
+        const updateDashboard = (data) => {
+            const { stats, analysis } = data;
+            
+            // Sidebar RAM
+            document.getElementById('sidebar-ram-percent').textContent = `${stats.used_percent.toFixed(1)}% used`;
+            const fillBar = document.getElementById('sidebar-ram-fill');
+            fillBar.style.width = `${stats.used_percent}%`;
+            fillBar.style.backgroundColor = getSeverityColor(analysis?.severity || (stats.used_percent > 85 ? 'high' : 'low'));
+            
+            // Pulse indicator
+            document.getElementById('live-pulse').style.backgroundColor = 'var(--green)';
+
+            // Dashboard Metrics
+            document.getElementById('dash-total-ram').textContent = (stats.total / (1024**3)).toFixed(1) + ' GB';
+            document.getElementById('dash-used-pct').textContent = stats.used_percent.toFixed(1) + '%';
+            document.getElementById('dash-free-ram').textContent = (stats.free / (1024**3)).toFixed(1) + ' GB';
+            document.getElementById('dash-swap-pct').textContent = stats.swap_percent.toFixed(1) + '%';
+            
+            // Update UI status pills - assume running if we are getting data
+            document.querySelectorAll('.pill-dot').forEach(el => {
+                el.style.backgroundColor = 'var(--green)';
+                el.style.boxShadow = '0 0 8px var(--green)';
+            });
+
+            // ── System Health Overview ───────────────────────────────────────
+            const memPct  = stats.used_percent;
+            const cpuPct  = stats.cpu_percent || 0;
+            const swpPct  = stats.swap_percent || 0;
+
+            // Score: penalise high mem/cpu, max 100
+            let score = Math.round(100 - (memPct * 0.6) - (cpuPct * 0.25) - (swpPct * 0.15));
+            score = Math.max(0, Math.min(100, score));
+
+            const scoreEl = document.getElementById('health-score-val');
+            const arc     = document.getElementById('health-ring-arc');
+            if (scoreEl && arc) {
+                scoreEl.textContent = score;
+                const circ = 2 * Math.PI * 56;   // 351.86
+                const offset = circ - (score / 100) * circ;
+                arc.setAttribute('stroke-dashoffset', offset.toFixed(1));
+                const color = score >= 70 ? 'var(--green)' : score >= 40 ? 'var(--yellow)' : 'var(--red)';
+                arc.setAttribute('stroke', color);
+                if (scoreEl) scoreEl.style.color = color;
+            }
+
+            const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+            // Health pill styling
+            const pressureEl = document.getElementById('h-pressure');
+            if (pressureEl) {
+                if (memPct >= 85) { pressureEl.textContent = 'High'; pressureEl.className = 'hstat-val status-danger'; }
+                else if (memPct >= 70) { pressureEl.textContent = 'Moderate'; pressureEl.className = 'hstat-val status-warn'; }
+                else { pressureEl.textContent = 'Low'; pressureEl.className = 'hstat-val status-good'; }
+            }
+            
+            const cpuEl = document.getElementById('h-cpu');
+            if (cpuEl) {
+                cpuEl.textContent = cpuPct.toFixed(1) + '%';
+                cpuEl.className = 'hstat-val ' + (cpuPct >= 80 ? 'status-danger' : cpuPct >= 50 ? 'status-warn' : 'status-good');
+            }
+
+            const swapEl = document.getElementById('h-swap');
+            if (swapEl) {
+                swapEl.textContent = swpPct.toFixed(1) + '%';
+                swapEl.className = 'hstat-val ' + (swpPct > 20 ? 'status-danger' : swpPct > 0 ? 'status-warn' : 'status-good');
+            }
+
+            // memory breakdown bar
+            const usedFill  = document.getElementById('mem-used-fill');
+            const cacheFill = document.getElementById('mem-cache-fill');
+            const barLabel  = document.getElementById('mem-bar-label');
+            if (usedFill) usedFill.style.width   = memPct.toFixed(1) + '%';
+            if (cacheFill) cacheFill.style.width  = Math.max(0, 100 - memPct - 2).toFixed(1) + '%';
+            if (barLabel) {
+                const usedGB  = (stats.used  / (1024**3)).toFixed(1);
+                const totalGB = (stats.total / (1024**3)).toFixed(1);
+                barLabel.textContent = usedGB + ' / ' + totalGB + ' GB';
+            }
+        };
+
+        const getSeverityColor = (severity) => {
+            switch(severity) {
+                case 'critical': return 'var(--red)';
+                case 'high': return 'var(--yellow)';
+                default: return 'var(--green)';
+            }
+        };
+
+        // Trigger Healing
+        document.getElementById('btn-trigger-heal').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-trigger-heal');
+            const originalText = btn.textContent;
+            btn.textContent = 'Healing...';
+            btn.disabled = true;
+            
+            try {
+                const res = await fetch('/api/memory/heal', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({execute: true})
+                });
+                const data = await res.json();
+                
+                if (typeof window.refreshHealingTimeline === 'function') {
+                    window.refreshHealingTimeline();
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // Mini Heal Log
+        let miniHealAnomaly = 0;
+        const refreshMiniHealLog = async () => {
+            try {
+                const [rh, ra] = await Promise.all([
+                    fetch('/api/logs/healing?limit=5').then(r => r.json()),
+                    fetch('/api/memory/anomalies?limit=1000').then(r => r.json()),
+                ]);
+                const heals = rh.events || [];
+                const anomalyCount = ra.anomalies ? ra.anomalies.length : 0;
+
+                const log = document.getElementById('mini-heal-log');
+                if (log) {
+                    if (heals.length === 0) {
+                        log.innerHTML = '<div class="text-muted" style="text-align:center;padding:1rem;font-size:0.82rem">No healing events yet</div>';
+                    } else {
+                        log.innerHTML = heals.map(h => {
+                            const res   = h.results || {};
+                            const plan  = h.plan   || {};
+                            const valid = h.validation || {};
+                            
+                            // Extract freed MB properly using freed_percent and total memory
+                            let freed = 0;
+                            if (valid.freed_percent != null && h.stats && h.stats.total) {
+                                freed = (h.stats.total * (valid.freed_percent / 100)) / (1024 * 1024);
+                            } else {
+                                freed = valid.memory_freed_mb ?? res.freed_mb ?? 0;
+                            }
+                            
+                            // Extract actions
+                            let action = 'unknown';
+                            if (plan.recommended_actions && plan.recommended_actions.length > 0) {
+                                action = plan.recommended_actions.map(a => a.action).join(', ');
+                            } else if (plan.action) {
+                                action = plan.action;
+                            }
+                            
+                            const ts = new Date(h.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+                            const dotCls = freed > 0 ? 'good' : freed < -5 ? 'bad' : 'partial';
+                            return `<div class="mini-heal-entry">
+                                <div class="heal-dot ${dotCls}"></div>
+                                <div class="heal-entry-main">
+                                    <div class="heal-entry-action">${action}</div>
+                                    <div class="heal-entry-meta">${ts}</div>
+                                </div>
+                                <span class="heal-entry-freed">${freed >= 0 ? '+' : ''}${freed.toFixed(1)} MB</span>
+                            </div>`;
+                        }).join('');
+                    }
+                }
+
+                // update health counters
+                const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+                setText('h-heals',    heals.length);
+                setText('h-anomalies', anomalyCount);
+            } catch(e) { console.warn('Mini heal log error:', e); }
+        };
+
+        // ML samples update via ml status
+        const refreshHealthCounters = async () => {
+            try {
+                const r = await fetch('/api/ml/status');
+                const d = await r.json();
+                const samples = d.anomaly_detector?.samples_collected || d.predictor?.samples_in_buffer || '--';
+                const el = document.getElementById('h-samples');
+                if (el) el.textContent = samples;
+            } catch(e) {}
+        };
+
+        // Initialize polling and secondary data loads
+        setInterval(fetchData, 5000);
+        setInterval(refreshMiniHealLog, 30000);
+        fetchData(); // Run right away
+
+        // Initialise sub-views sequentially rather than concurrent to avoid race
+        setTimeout(() => {
+            if (typeof window.initMemoryChart === 'function') window.initMemoryChart();
+            if (typeof window.initForecastChart === 'function') window.initForecastChart();
+            if (typeof window.refreshHealingTimeline === 'function') window.refreshHealingTimeline();
+            if (typeof window.initMLScoreboard === 'function') window.initMLScoreboard();
+            refreshMiniHealLog();
+            refreshHealthCounters();
+        }, 300);
+
+        /* ── Toast Notification System ────────────────────────────────────── */
+        window.showToast = (title, message, type = 'success', duration = 5000) => {
+            const icons = { success: '✅', error: '❌', info: 'ℹ️', warn: '⚠️' };
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type] || '🔔'}</span>
+                <div class="toast-body">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-msg">${message}</div>
+                </div>
+                <button class="toast-close" onclick="dismissToast(this.parentElement)">✕</button>`;
+            container.appendChild(toast);
+            if (duration > 0) setTimeout(() => dismissToast(toast), duration);
+        };
+        window.dismissToast = (el) => {
+            if (!el || !el.parentElement) return;
+            el.classList.add('hiding');
+            setTimeout(() => el.remove(), 300);
+        };
+
+        /* ── Optimizer Button Handlers ────────────────────────────────────── */
+        const setOptSpinner = (show) => {
+            const s = document.getElementById('opt-spinner');
+            if (s) s.style.display = show ? 'block' : 'none';
+        };
+        const disableOptBtns = (d) => {
+            ['btn-deep-optimize','btn-quick-heal','btn-manual-heal'].forEach(id => {
+                const b = document.getElementById(id);
+                if (b) b.disabled = d;
+            });
+        };
+        const showOptResult = (r) => {
+            const el = (id) => document.getElementById(id);
+            const res = document.getElementById('opt-result');
+            if (!res) return;
+            res.style.display = 'block';
+            if (el('opt-freed'))       el('opt-freed').textContent       = (r.freed_mb || 0).toFixed(1) + ' MB';
+            if (el('opt-trimmed'))     el('opt-trimmed').textContent     = r.trimmed || 0;
+            if (el('opt-standby'))     el('opt-standby').textContent     = r.standby_flushed ? '✅ Yes' : '❌ No (needs admin)';
+            if (el('opt-before-after'))el('opt-before-after').textContent = (r.before_mb||0).toFixed(0)+' → '+(r.after_mb||0).toFixed(0)+' MB';
+        };
+
+        // Clean RAM (Deep Optimize + standby flush)
+        document.getElementById('btn-deep-optimize')?.addEventListener('click', async () => {
+            disableOptBtns(true); setOptSpinner(true);
+            try {
+                const r = await fetch('/api/memory/optimize', { method: 'POST' }).then(x => x.json());
+                showOptResult(r);
+                const freed = (r.freed_mb || 0).toFixed(1);
+                const standby = r.standby_flushed ? ' + standby flushed' : '';
+                showToast('Clean RAM Complete', `Freed ${freed} MB — ${r.trimmed || 0} processes trimmed${standby}`, freed > 0 ? 'success' : 'info');
+            } catch(e) {
+                showToast('Optimization Failed', e.message || 'Unknown error', 'error');
+            } finally { disableOptBtns(false); setOptSpinner(false); }
+        });
+
+        // Quick Heal (GC only—lighter)
+        document.getElementById('btn-quick-heal')?.addEventListener('click', async () => {
+            disableOptBtns(true); setOptSpinner(true);
+            try {
+                const r = await fetch('/api/memory/quick_heal', { method: 'POST' }).then(x => x.json());
+                showOptResult(r);
+                showToast('Quick Heal Done', `GC collected · ${(r.freed_mb||0).toFixed(1)} MB freed`, 'info');
+            } catch(e) {
+                showToast('Quick Heal Failed', e.message || 'Unknown error', 'error');
+            } finally { disableOptBtns(false); setOptSpinner(false); }
+        });
+
+        // Force Heal Now (ML healer trigger)
+        document.getElementById('btn-manual-heal')?.addEventListener('click', async () => {
+            disableOptBtns(true);
+            showToast('Heal Triggered', 'Running ML healer cycle…', 'info', 2500);
+            try {
+                const r = await fetch('/api/heal/manual', { method: 'POST' }).then(x => x.json());
+                const freed = (r.freed_mb || 0).toFixed(1);
+                showToast('Heal Complete', `ML healer ran · ${freed} MB freed`, r.success ? 'success' : 'warn');
+                refreshMiniHealLog();
+            } catch(e) {
+                showToast('Heal Failed', e.message || 'Unknown error', 'error');
+            } finally { disableOptBtns(false); }
+        });
+
+        /* ── Live ML Sample Polling (only while ML Engine page is open) ───── */
+        setInterval(async () => {
+            const mlView = document.getElementById('ml-view');
+            if (!mlView || !mlView.classList.contains('active')) return;
+            try {
+                const d = await fetch('/api/ml/status').then(r => r.json());
+                if (!d.success) return;
+                // Anomaly Detector samples
+                const detSamples = d.anomaly_detector?.samples_collected ?? '--';
+                const detEl = document.getElementById('ml-detector-samples');
+                if (detEl) detEl.textContent = `${detSamples} / 500 max`;
+                // Predictor buffer
+                const predBuf = d.predictor?.samples_in_buffer ?? '--';
+                const predEl = document.getElementById('ml-predictor-samples');
+                if (predEl) predEl.textContent = `${predBuf} / 200 max`;
+                // Also update the small dashboard sample counter
+                const hEl = document.getElementById('h-samples');
+                if (hEl) hEl.textContent = predBuf;
+            } catch(e) {}
+        }, 5000);
+
+        /* ── Chart Time Range Filter ───────────────────────────────────────── */
+        // points per range (1 sample = 10s): 1m=6, 5m=30, 10m=60, 30m=180, 1h=360, 3h=1080
+        const RANGE_LIMITS = { live: 30, '1m': 6, '5m': 30, '10m': 60, '30m': 180, '1h': 360, '3h': 1080 };
+        let currentRange = 'live';
+        window.chartPointLimit = 30; // 30 points = 5 minutes of live data
+        window.setChartRange = (range) => {
+            currentRange = range;
+            // Update button active states
+            Object.keys(RANGE_LIMITS).forEach(r => {
+                const b = document.getElementById(`range-${r}`);
+                if (b) b.classList.toggle('active', r === range);
+            });
+            if (!memoryChartInstance) return;
+            const limit = RANGE_LIMITS[range];
+            window.chartPointLimit = limit;
+            
+            // Fetch fresh history for historical ranges
+            if (range !== 'live') {
+                fetch(`/api/logs/memory?limit=${limit}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (!data.success || !data.events) return;
+                        // Events are returned newest first, reverse them for chronological chart display
+                        const h = data.events.slice().reverse();
+                        memoryChartData.labels = h.map(p => {
+                            const d = new Date(p.timestamp);
+                            return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+                        });
+                        memoryChartData.datasets[0].data = h.map(p => p.stats ? p.stats.used_percent : 0);
+                        
+                        // Check if anomaly in historical data
+                        memoryChartData.datasets[0].pointBackgroundColor = h.map(p => {
+                            const analysis = p.analysis || {};
+                            const isAnomaly = analysis.anomaly && analysis.anomaly.is_anomaly;
+                            return isAnomaly ? '#f85149' : '#3b82f6';
+                        });
+                        memoryChartData.datasets[0].pointBorderColor = h.map(p => {
+                            const analysis = p.analysis || {};
+                            const isAnomaly = analysis.anomaly && analysis.anomaly.is_anomaly;
+                            return isAnomaly ? '#fff' : '#161b22';
+                        });
+                        memoryChartData.datasets[0].pointRadius = h.map(p => {
+                            const analysis = p.analysis || {};
+                            const isAnomaly = analysis.anomaly && analysis.anomaly.is_anomaly;
+                            return isAnomaly ? 6 : 0;
+                        });
+                        memoryChartInstance.update();
+                    });
+            } else {
+                // "Live" — trim to last 30 points
+                const n = memoryChartData.labels.length;
+                if (n > limit) {
+                    memoryChartData.labels = memoryChartData.labels.slice(-limit);
+                    memoryChartData.datasets[0].data = memoryChartData.datasets[0].data.slice(-limit);
+                    memoryChartData.datasets[0].pointRadius = memoryChartData.datasets[0].pointRadius.slice(-limit);
+                    memoryChartData.datasets[0].pointBackgroundColor = memoryChartData.datasets[0].pointBackgroundColor.slice(-limit);
+                    memoryChartData.datasets[0].pointBorderColor = memoryChartData.datasets[0].pointBorderColor.slice(-limit);
+                    memoryChartInstance.update();
+                }
+            }
+        };
+
+        /* ── Auto-Heal Toggle ──────────────────────────────────────────────── */
+        const updateAutoHealBtn = (paused) => {
+            const icon  = document.getElementById('autoheal-icon');
+            const label = document.getElementById('autoheal-label');
+            const btn   = document.getElementById('btn-autoheal-toggle');
+            if (!btn) return;
+            if (paused) {
+                if (icon)  icon.textContent  = '🔴';
+                if (label) label.textContent = 'Auto-Heal: OFF';
+                btn.style.borderColor = 'rgba(248,81,73,0.4)';
+                btn.style.background  = 'rgba(248,81,73,0.08)';
+                btn.style.color       = 'var(--red)';
+            } else {
+                if (icon)  icon.textContent  = '🟢';
+                if (label) label.textContent = 'Auto-Heal: ON';
+                btn.style.borderColor = 'rgba(63,185,80,0.4)';
+                btn.style.background  = 'rgba(63,185,80,0.08)';
+                btn.style.color       = 'var(--green)';
+            }
+        };
+        window.toggleAutoHeal = async () => {
+            try {
+                const r = await fetch('/api/heal/toggle', { method: 'POST' }).then(x => x.json());
+                updateAutoHealBtn(r.paused);
+                showToast(r.paused ? 'Auto-Heal Paused' : 'Auto-Heal Resumed',
+                          r.paused ? 'Automatic healing is now OFF' : 'Automatic healing is now ON',
+                          r.paused ? 'warn' : 'success');
+            } catch(e) { console.error('toggle error', e); }
+        };
+        // Load initial state on startup
+        fetch('/api/heal/status').then(r => r.json()).then(d => { if (d.success) updateAutoHealBtn(d.paused); });
+
+    </script>
+
+</body>
+</html>

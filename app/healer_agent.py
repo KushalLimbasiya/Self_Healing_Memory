@@ -32,6 +32,7 @@ class HealerAgent:
         self._store = event_store
         self._brain = healer_brain
         self._running = False
+        self._paused  = False
         self._thread: Optional[threading.Thread] = None
         self._last_heal_time: float = 0.0
         self._last_result: dict = {}
@@ -50,6 +51,17 @@ class HealerAgent:
     def stop(self) -> None:
         self._running = False
         logger.info("HealerAgent stopped")
+
+    def pause(self) -> None:
+        self._paused = True
+        logger.info("HealerAgent paused (auto-heal OFF)")
+
+    def resume(self) -> None:
+        self._paused = False
+        logger.info("HealerAgent resumed (auto-heal ON)")
+
+    def is_paused(self) -> bool:
+        return self._paused
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
@@ -73,6 +85,9 @@ class HealerAgent:
     def _loop(self) -> None:
         while self._running:
             try:
+                if self._paused:
+                    time.sleep(HEAL_CHECK_INTERVAL)
+                    continue
                 stats = get_memory_stats()
                 used = stats.get("used_percent", 0)
 

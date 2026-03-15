@@ -1,310 +1,160 @@
-import os
+"""
+web_interface.py — Flask routes for the Self-Healing Memory system.
+
+All agents are passed in via register_routes() — no duplicate instances,
+no ORM, no LLM calls. Pure REST API + dashboard template.
+"""
 import logging
-import json
-from datetime import datetime, timedelta
-import threading
-from flask import render_template, jsonify, request, current_app
-from app.monitor_agent import MemoryMonitorAgent
-from app.predictor_agent import MemoryPredictorAgent
-from app.healer_agent import MemoryHealerAgent
-from app.memory_core import get_memory_stats, simulate_memory_usage
-from app import create_app, db
-from models import MemoryEvent, MemoryPrediction, HealingEvent
+from flask import Flask, jsonify, render_template, request
 
-# Create Flask app with SQLAlchemy configuration
-app = create_app({
-    'SQLALCHEMY_DATABASE_URI': 'sqlite:///data/memory_system.db',
-    'SQLALCHEMY_TRACK_MODIFICATIONS': False
-})
+from app import event_store as es
+from app.memory_core import get_top_processes, full_system_optimize, release_memory_cache
 
-# Configure logging
 logger = logging.getLogger(__name__)
 
-# Global references to agents
-monitor_agent = None
-predictor_agent = None
-healer_agent = None
 
-# Store memory data for charts
-memory_history = []
-MAX_HISTORY_POINTS = 100
+def register_routes(app: Flask, agents: dict) -> None:
+    """Bind all routes onto the Flask app with access to shared agent instances."""
 
-def initialize_agents():
-    """Initialize agent instances for the web interface."""
-    global monitor_agent, predictor_agent, healer_agent
-    
-    if not monitor_agent:
-        # These are separate instances from the ones in main.py
-        # They are used only for handling web interface requests
-        monitor_agent = MemoryMonitorAgent()
-        predictor_agent = MemoryPredictorAgent()
-        healer_agent = MemoryHealerAgent()
-        
-        logger.info("Web interface agent references initialized")
+    monitor    = agents["monitor"]
+    pred_agent = agents["predictor"]
+    healer     = agents["healer"]
+    detector   = agents["detector"]
+    brain      = agents["brain"]
+    predictor  = agents["ml_predictor"]
 
-# Initialize agents on startup
-with app.app_context():
-    initialize_agents()
+    # ── Dashboard ──────────────────────────────────────────────────────────────
 
-@app.route('/')
-def index():
-    """Render the main dashboard page."""
-    return render_template('grafana_dashboard.html')
+    @app.route("/")
+    def dashboard():
+        return render_template("dashboard.html")
 
-@app.route('/dashboard')
-def dashboard():
-    """Render the main dashboard page."""
-    return render_template('grafana_dashboard.html')
+    # ── Memory ─────────────────────────────────────────────────────────────────
 
-@app.route('/legacy')
-def legacy_dashboard():
-    """Render the legacy dashboard page."""
-    return render_template('index.html')
+    @app.route("/api/memory/current")
+    def api_memory_current():
+        stats    = monitor.current_stats()
+        analysis = monitor.last_analysis()
+        return jsonify({"success": True, "stats": stats, "analysis": analysis})
 
-@app.route('/api/memory/current')
-def get_current_memory():
-    """API endpoint to get current memory statistics."""
-    try:
-        stats = get_memory_stats()
-        
-        # Add to history
-        global memory_history
-        memory_history.append({
-            'timestamp': datetime.now().isoformat(),
-            'used_percent': stats.get('used_percent', 0)
+    @app.route("/api/memory/processes")
+    def api_memory_processes():
+        limit = request.args.get("limit", 8, type=int)
+        return jsonify({"success": True, "processes": get_top_processes(limit)})
+
+    @app.route("/api/memory/analyze", methods=["POST"])
+    def api_memory_analyze():
+        analysis = monitor.analyze_now()
+        return jsonify({"success": True, "analysis": analysis})
+
+    @app.route("/api/memory/optimize", methods=["POST"])
+    def api_memory_optimize():
+        """Trigger deep system-wide memory optimization (CleanMem / Wise MO technique)."""
+        result = full_system_optimize()
+        return jsonify({"success": True, **result})
+
+    @app.route("/api/memory/quick_heal", methods=["POST"])
+    def api_memory_quick_heal():
+        """Trigger light optimization (GC + local working set trim)."""
+        success = release_memory_cache()
+        # Return a similar structure so UI doesn't break
+        return jsonify({
+            "success": success, 
+            "freed_mb": 0, # harder to measure local-only freed accurately here without overhead
+            "message": "Local cache released" if success else "Failed"
         })
-        
-        # Trim history if needed
-        if len(memory_history) > MAX_HISTORY_POINTS:
-            memory_history = memory_history[-MAX_HISTORY_POINTS:]
-            
-        return jsonify(success=True, data=stats)
-    except Exception as e:
-        logger.error(f"Error getting memory stats: {str(e)}")
-        return jsonify(success=False, error=str(e))
 
-@app.route('/api/memory/history')
-def get_memory_history():
-    """API endpoint to get memory usage history."""
-    try:
-        return jsonify(success=True, data=memory_history)
-    except Exception as e:
-        logger.error(f"Error getting memory history: {str(e)}")
-        return jsonify(success=False, error=str(e))
+    @app.route("/api/memory/anomalies")
+    def api_memory_anomalies():
+        limit = request.args.get("limit", 15, type=int)
+        anomalies = es.get_recent_anomalies(limit=limit)
+        return jsonify({"success": True, "anomalies": anomalies})
 
-disable_db = os.environ.get("DISABLE_DATABASE", "").lower() == "true"
+    @app.route("/api/memory/history")
+    def api_memory_history():
+        limit   = request.args.get("limit", 100, type=int)
+        history = es.get_memory_history_series(limit=limit)
+        return jsonify({"success": True, "history": history, "count": len(history)})
 
-@app.route('/api/memory/analyze', methods=['POST'])
-def analyze_memory():
-    """API endpoint to analyze current memory conditions."""
-    try:
-        initialize_agents()
-        
-        stats = get_memory_stats()
-        
-        analysis = monitor_agent.analyze_memory_conditions(stats)
-        
-        if not disable_db:
-            with app.app_context():
-                # Create a new memory event
-                memory_event = MemoryEvent(
-                    stats=stats,
-                    analysis=analysis
-                )
-                db.session.add(memory_event)
-                db.session.commit()
-                logger.info(f"Saved memory event to database: id={memory_event.id}")
-        
-        with open('data/memory_events.jsonl', 'a') as f:
-            f.write(json.dumps({
-                'timestamp': datetime.now().isoformat(),
-                'stats': stats,
-                'analysis': analysis
-            }) + '\n')
-        
-        return jsonify(success=True, stats=stats, analysis=analysis)
-    except Exception as e:
-        logger.error(f"Error analyzing memory: {str(e)}")
-        return jsonify(success=False, error=str(e))
+    # ── Prediction ─────────────────────────────────────────────────────────────
 
-@app.route('/api/memory/predict', methods=['POST'])
-def predict_memory():
-    """API endpoint to predict future memory conditions."""
-    try:
-        initialize_agents()
-        
-        stats = get_memory_stats()
-        
-        recent_events = []
-        with app.app_context():
-            db_events = MemoryEvent.query.order_by(MemoryEvent.timestamp.desc()).limit(20).all()
-            recent_events = [event.to_dict() for event in db_events]
-        
-        prediction = predictor_agent.predict_memory_condition(stats, recent_events)
-        
-        with app.app_context():
-            memory_prediction = MemoryPrediction(
-                current_memory_used=stats.get('used_percent', 0),
-                predicted_memory_usage_1h=prediction.get('predicted_usage_1h', None),
-                predicted_memory_usage_24h=prediction.get('predicted_usage_24h', None),
-                predicted_issues=prediction.get('potential_issues', [])
-            )
-            db.session.add(memory_prediction)
-            db.session.commit()
-            logger.info(f"Saved memory prediction to database: id={memory_prediction.id}")
-        
-        with open('data/memory_predictions.jsonl', 'a') as f:
-            f.write(json.dumps({
-                'timestamp': datetime.now().isoformat(),
-                'stats': stats,
-                'prediction': prediction
-            }) + '\n')
-        
-        return jsonify(success=True, stats=stats, prediction=prediction)
-    except Exception as e:
-        logger.error(f"Error predicting memory: {str(e)}")
-        return jsonify(success=False, error=str(e))
+    @app.route("/api/memory/predict", methods=["POST"])
+    def api_memory_predict():
+        forecast = pred_agent.predict_now()
+        return jsonify({"success": True, "forecast": forecast})
 
-@app.route('/api/memory/heal', methods=['POST'])
-def heal_memory():
-    """API endpoint to execute healing actions."""
-    try:
-        initialize_agents()
-        
-        stats = get_memory_stats()
-        
-        healing_plan = healer_agent.generate_healing_plan(stats)
-        execute = request.json.get('execute', False)
-        results = None
-        validation = None
-        
-        if execute and healing_plan and 'actions' in healing_plan and healing_plan['actions']:
-            results = healer_agent.execute_actions(healing_plan['actions'])
-            validation = healer_agent.validate_healing_results(results)
-            
-            with app.app_context():
-                healing_event = HealingEvent(
-                    memory_stats=stats,
-                    healing_plan=healing_plan,
-                    results=results,
-                    validation=validation
-                )
-                db.session.add(healing_event)
-                db.session.commit()
-                logger.info(f"Saved healing event to database: id={healing_event.id}")
-            
-            with open('data/healing_events.jsonl', 'a') as f:
-                f.write(json.dumps({
-                    'timestamp': datetime.now().isoformat(),
-                    'memory_stats': stats,
-                    'healing_plan': healing_plan,
-                    'results': results,
-                    'validation': validation
-                }) + '\n')
-        
-        return jsonify(
-            success=True, 
-            stats=stats, 
-            healing_plan=healing_plan,
-            executed=execute,
-            results=results,
-            validation=validation
-        )
-    except Exception as e:
-        logger.error(f"Error healing memory: {str(e)}")
-        return jsonify(success=False, error=str(e))
+    @app.route("/api/memory/predict/latest")
+    def api_memory_predict_latest():
+        forecast = es.get_latest_prediction()
+        return jsonify({"success": True, "forecast": forecast})
 
-@app.route('/api/memory/simulate', methods=['POST'])
-def simulate_memory():
-    """API endpoint to simulate memory usage for testing."""
-    try:
-        usage_mb = request.json.get('usage_mb', 100)
-        
-        usage_mb = max(10, min(500, usage_mb))
-        
-        def run_simulation():
-            try:
-                simulate_memory_usage(usage_mb)
-            except Exception as e:
-                logger.error(f"Error in memory simulation: {str(e)}")
-        
-        simulation_thread = threading.Thread(target=run_simulation)
-        simulation_thread.daemon = True
-        simulation_thread.start()
-        
-        return jsonify(
-            success=True,
-            message=f"Started memory usage simulation using {usage_mb}MB"
-        )
-    except Exception as e:
-        logger.error(f"Error starting memory simulation: {str(e)}")
-        return jsonify(success=False, error=str(e))
+    # ── Healing ────────────────────────────────────────────────────────────────
 
-@app.route('/api/logs/memory', methods=['GET'])
-def get_memory_logs():
-    """API endpoint to get recent memory event logs."""
-    try:
-        limit = int(request.args.get('limit', 20))
-        logs = []
-        
-        with app.app_context():
-            db_events = MemoryEvent.query.order_by(MemoryEvent.timestamp.desc()).limit(limit).all()
-            logs = [event.to_dict() for event in db_events]
-        
-        if not logs and os.path.exists('data/memory_events.jsonl'):
-            with open('data/memory_events.jsonl', 'r') as f:
-                lines = f.readlines()
-                for line in lines[-limit:]:
-                    logs.append(json.loads(line.strip()))
-        
-        return jsonify(success=True, logs=logs)
-    except Exception as e:
-        logger.error(f"Error getting memory logs: {str(e)}")
-        return jsonify(success=False, error=str(e))
+    @app.route("/api/memory/heal", methods=["POST"])
+    def api_memory_heal():
+        body    = request.get_json(silent=True) or {}
+        execute = body.get("execute", False)
+        result  = healer.heal_now(execute=execute)
+        return jsonify({"success": True, **result})
 
-@app.route('/api/logs/healing', methods=['GET'])
-def get_healing_logs():
-    """API endpoint to get recent healing event logs."""
-    try:
-        limit = int(request.args.get('limit', 20))
-        logs = []
-        
-        with app.app_context():
-            db_events = HealingEvent.query.order_by(HealingEvent.timestamp.desc()).limit(limit).all()
-            logs = [event.to_dict() for event in db_events]
-        
-        if not logs and os.path.exists('data/healing_events.jsonl'):
-            with open('data/healing_events.jsonl', 'r') as f:
-                lines = f.readlines()
-                for line in lines[-limit:]:
-                    logs.append(json.loads(line.strip()))
-        
-        return jsonify(success=True, logs=logs)
-    except Exception as e:
-        logger.error(f"Error getting healing logs: {str(e)}")
-        return jsonify(success=False, error=str(e))
+    @app.route("/api/heal/manual", methods=["POST"])
+    def api_heal_manual():
+        """Immediately trigger a healing cycle (manual / click-based, execute=True)."""
+        try:
+            result = healer.heal_now(execute=True)
+            return jsonify({"success": True, "manual": True, **result})
+        except Exception as e:
+            logger.error("Manual heal error: %s", e)
+            return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route('/api/logs/predictions', methods=['GET'])
-def get_prediction_logs():
-    """API endpoint to get recent prediction logs."""
-    try:
-        limit = int(request.args.get('limit', 20))
-        logs = []
-        
-        with app.app_context():
-            db_predictions = MemoryPrediction.query.order_by(MemoryPrediction.timestamp.desc()).limit(limit).all()
-            logs = [prediction.to_dict() for prediction in db_predictions]
-        
-        if not logs and os.path.exists('data/memory_predictions.jsonl'):
-            with open('data/memory_predictions.jsonl', 'r') as f:
-                lines = f.readlines()
-                for line in lines[-limit:]:
-                    logs.append(json.loads(line.strip()))
-        
-        return jsonify(success=True, logs=logs)
-    except Exception as e:
-        logger.error(f"Error getting prediction logs: {str(e)}")
-        return jsonify(success=False, error=str(e))
+    @app.route("/api/heal/toggle", methods=["POST"])
+    def api_heal_toggle():
+        """Pause or resume the auto-healer."""
+        if healer.is_paused():
+            healer.resume()
+            return jsonify({"success": True, "paused": False, "message": "Auto-healer resumed"})
+        else:
+            healer.pause()
+            return jsonify({"success": True, "paused": True, "message": "Auto-healer paused"})
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    @app.route("/api/heal/status")
+    def api_heal_status():
+        """Return whether auto-healer is currently paused."""
+        return jsonify({"success": True, "paused": healer.is_paused()})
+
+    # ── Logs ───────────────────────────────────────────────────────────────────
+
+    @app.route("/api/logs/memory")
+    def api_logs_memory():
+        limit  = request.args.get("limit", 50, type=int)
+        events = es.get_recent_memory_events(limit=limit)
+        return jsonify({"success": True, "events": events, "count": len(events)})
+
+    @app.route("/api/logs/healing")
+    def api_logs_healing():
+        limit  = request.args.get("limit", 20, type=int)
+        events = es.get_recent_healing_events(limit=limit)
+        return jsonify({"success": True, "events": events, "count": len(events)})
+
+    @app.route("/api/logs/predictions")
+    def api_logs_predictions():
+        limit   = request.args.get("limit", 20, type=int)
+        preds = es.get_recent_predictions(limit=limit)
+        return jsonify({"success": True, "predictions": preds, "count": len(preds)})
+
+    # ── ML Status ──────────────────────────────────────────────────────────────
+
+    @app.route("/api/ml/status")
+    def api_ml_status():
+        return jsonify({
+            "success": True,
+            "anomaly_detector": detector.status(),
+            "predictor":        predictor.status(),
+            "healer_scoreboard": brain.scoreboard(),
+        })
+
+    # ── Health check ───────────────────────────────────────────────────────────
+
+    @app.route("/api/health")
+    def api_health():
+        return jsonify({"status": "ok", "service": "self-healing-memory"})

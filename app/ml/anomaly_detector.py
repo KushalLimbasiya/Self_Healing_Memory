@@ -100,7 +100,7 @@ class AnomalyDetector:
             return {"is_anomaly": False, "score": 0.0, "method": "zscore",
                     "description": "Memory usage stable"}
         z = abs((used - mean) / std)
-        is_anomaly = z > 2.5
+        is_anomaly = z > 4.5
         return {
             "is_anomaly": bool(is_anomaly),
             "score": round(float(z), 3),
@@ -131,7 +131,7 @@ class AnomalyDetector:
                 data = list(self._buffer)
                 self._samples_since_retrain = 0
             X = np.array([[v] for v in data])
-            model = IsolationForest(contamination=0.05, random_state=42, n_jobs=-1)
+            model = IsolationForest(contamination=0.01, random_state=42, n_jobs=-1)
             model.fit(X)
             with self._lock:
                 self._model = model
