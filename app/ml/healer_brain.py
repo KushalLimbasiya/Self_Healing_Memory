@@ -13,9 +13,12 @@ logger = logging.getLogger(__name__)
 DEFAULT_ACTIONS = {
     "gc_collect":    0.6,   # Python GC — always safe, moderate effect
     "clear_cache":   0.7,   # OS cache release — usually effective
-    "log_alert":     0.3,   # Logging alert only — low direct impact
-    "reduce_interval": 0.4, # Increase monitoring frequency temporarily
+    "log_alert":     0.3,   # Logging alert only — no direct memory impact
+    "reduce_interval": 0.4, # Increase monitoring frequency temporarily — no direct memory impact
 }
+
+# Actions that don't directly free memory — exclude from score updates
+_NON_MEMORY_ACTIONS = {"log_alert", "reduce_interval"}
 
 
 class HealerBrain:
@@ -63,16 +66,17 @@ class HealerBrain:
     def update_score(self, action: str, freed_percent: float) -> None:
         """
         Update the score for an action based on how effective it was.
-
-        Args:
-            action:        The action that was executed.
-            freed_percent: Memory freed as a percentage (0–100).
+        Non-memory actions (log_alert, reduce_interval) are skipped —
+        they can never free RAM so penalizing them with 0% is misleading.
         """
+        if action in _NON_MEMORY_ACTIONS:
+            return  # These actions don't touch physical memory, don't score them
+
         old = self._scores.get(action, 0.5)
         # Exponential moving average — recent results weighted 20%
         new = old * 0.8 + (freed_percent / 100.0) * 0.2
         self._scores[action] = round(new, 4)
-        logger.info("HealerBrain: '%s' score %.3f → %.3f (freed %.1f%%)",
+        logger.info("HealerBrain: '%s' score %.3f -> %.3f (freed %.1f%%)",
                     action, old, new, freed_percent)
 
         if self._store:

@@ -53,6 +53,14 @@ def init_db() -> None:
                 times_used  INTEGER NOT NULL DEFAULT 0,
                 avg_freed   REAL    NOT NULL DEFAULT 0.0
             );
+
+            CREATE TABLE IF NOT EXISTS ml_samples (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                model       TEXT    NOT NULL,
+                sample      REAL    NOT NULL,
+                timestamp   TEXT    NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_ml_model ON ml_samples (model, id);
         """)
     logger.info("Database initialised at %s", DB_PATH)
 
@@ -78,6 +86,30 @@ def get_recent_memory_events(limit: int = 50) -> List[Dict]:
          "analysis": json.loads(r["analysis"]) if r["analysis"] else None}
         for r in rows
     ]
+
+
+def get_recent_anomalies(limit: int = 10) -> List[Dict]:
+    """Extract recent anomaly events from the history."""
+    with _get_conn() as conn:
+        rows = conn.execute(
+            "SELECT timestamp, analysis FROM memory_events WHERE analysis LIKE '%\"is_anomaly\": true%' ORDER BY timestamp DESC LIMIT ?",
+            (limit,)
+        ).fetchall()
+    
+    result = []
+    for r in rows:
+        try:
+            analysis = json.loads(r["analysis"])
+            if analysis and analysis.get("anomaly", {}).get("is_anomaly"):
+                result.append({
+                    "timestamp": r["timestamp"],
+                    "used_percent": analysis.get("used_percent"),
+                    "severity": analysis.get("severity"),
+                    "method": analysis.get("anomaly", {}).get("method")
+                })
+        except Exception:
+            pass
+    return result
 
 
 def get_memory_history_series(limit: int = 100) -> List[Dict]:
@@ -184,7 +216,6 @@ def update_action_score(action: str, freed_percent: float) -> None:
         if existing:
             n = existing["times_used"] + 1
             new_avg = (existing["avg_freed"] * existing["times_used"] + freed_percent) / n
-            # Exponential moving average for score (recent results weighted more)
             new_score = existing["score"] * 0.8 + (freed_percent / 100.0) * 0.2
             conn.execute(
                 "UPDATE action_scores SET score=?, times_used=?, avg_freed=? WHERE action=?",
@@ -195,3 +226,37 @@ def update_action_score(action: str, freed_percent: float) -> None:
                 "INSERT INTO action_scores (action, score, times_used, avg_freed) VALUES (?, ?, 1, ?)",
                 (action, max(0.1, freed_percent / 100.0), freed_percent),
             )
+
+
+# -- ML Sample Buffer (persists across restarts) --------------------------------
+
+def save_ml_sample(model: str, sample: float) -> None:
+    """Append a single sample. Old samples are pruned to keep the last 2000."""
+    with _get_conn() as conn:
+        conn.execute(
+            "INSERT INTO ml_samples (model, sample, timestamp) VALUES (?, ?, ?)",
+            (model, sample, datetime.now().isoformat()),
+        )
+        # Prune: keep only the most recent 2000 rows per model
+        conn.execute(
+            """
+            DELETE FROM ml_samples
+            WHERE model = ?
+            AND id NOT IN (
+                SELECT id FROM ml_samples WHERE model = ?
+                ORDER BY id DESC LIMIT 2000
+            )
+            """,
+            (model, model),
+        )
+
+
+def load_ml_samples(model: str, limit: int = 500) -> List[float]:
+    """Load the most recent `limit` samples for a model, oldest first."""
+    with _get_conn() as conn:
+        rows = conn.execute(
+            "SELECT sample FROM ml_samples WHERE model = ? ORDER BY id DESC LIMIT ?",
+            (model, limit),
+        ).fetchall()
+    # Reverse so oldest first (chronological order)
+    return [r["sample"] for r in reversed(rows)]

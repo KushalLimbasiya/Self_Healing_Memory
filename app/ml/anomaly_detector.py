@@ -22,12 +22,27 @@ class AnomalyDetector:
     Retrains the model every 100 new samples automatically.
     """
 
-    def __init__(self):
+    def __init__(self, event_store=None):
         self._buffer: deque = deque(maxlen=BUFFER_MAX)
         self._model = None
         self._lock = threading.Lock()
         self._samples_since_retrain = 0
         self._retrain_every = 100
+        self._store = event_store
+
+        # Load persisted samples from DB so we don't restart cold
+        if self._store:
+            try:
+                saved = self._store.load_ml_samples("anomaly", limit=BUFFER_MAX)
+                for s in saved:
+                    self._buffer.append(s)
+                if saved:
+                    logger.info("AnomalyDetector: loaded %d samples from DB", len(saved))
+                    # Trigger immediate training if we have enough
+                    if len(self._buffer) >= MIN_SAMPLES_FOR_MODEL:
+                        threading.Thread(target=self._retrain, daemon=True).start()
+            except Exception as e:
+                logger.warning("AnomalyDetector: could not load samples from DB: %s", e)
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
@@ -36,6 +51,13 @@ class AnomalyDetector:
         with self._lock:
             self._buffer.append(used_percent)
             self._samples_since_retrain += 1
+
+        # Persist to DB (so survives restarts)
+        if self._store:
+            try:
+                self._store.save_ml_sample("anomaly", used_percent)
+            except Exception:
+                pass
 
         if (len(self._buffer) >= MIN_SAMPLES_FOR_MODEL
                 and self._samples_since_retrain >= self._retrain_every):

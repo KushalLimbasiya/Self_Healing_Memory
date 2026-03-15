@@ -1,231 +1,125 @@
-import os
-import time
+"""
+monitor_agent.py — Continuously monitors OS memory and detects anomalies.
+Uses AnomalyDetector (Isolation Forest / Z-score) for smart anomaly detection.
+"""
 import logging
 import threading
-import json
-import subprocess
+import time
 from datetime import datetime
+from typing import Optional
 
-from .llm_utils import LLMProcessor
-from .memory_core import get_memory_stats
+from app.memory_core import get_memory_stats
+from app.ml.anomaly_detector import AnomalyDetector
+from app.ml.predictor import MemoryPredictor
 
 logger = logging.getLogger(__name__)
 
-class MemoryMonitorAgent:
+POLL_INTERVAL = 10   # seconds between readings (10s = 24 samples in 4min instead of 12min)
+
+
+class MonitorAgent:
     """
-    Agent responsible for monitoring memory conditions and detecting anomalies.
+    Runs in a background thread, polls memory stats every POLL_INTERVAL seconds,
+    feeds data into the AnomalyDetector and MemoryPredictor, and persists events.
     """
-    
-    def __init__(self, rag_pipeline=None):
-        """
-        Initialize the Memory Monitor Agent.
-        
-        Args:
-            rag_pipeline: The RAG pipeline for context-aware decisions
-        """
-        self.rag_pipeline = rag_pipeline
-        self.running = False
-        self.monitor_thread = None
-        self.monitor_interval = 60  
-        self.llm_processor = LLMProcessor(
-            model="mistral",
-            api_key=os.environ.get("MISTRAL_API_KEY_MONITOR"),
-            cache_dir="data/monitor_cache"
-        )
-        self.memory_threshold = 0.8  
-        logger.info("Memory Monitor Agent initialized")
-        
-    def start_monitoring(self, interval=60):
-        """
-        Start monitoring memory conditions in a separate thread.
-        
-        Args:
-            interval: Monitoring interval in seconds
-        """
-        if self.running:
-            logger.warning("Monitoring is already running")
+
+    def __init__(self,
+                 event_store,
+                 anomaly_detector: AnomalyDetector,
+                 predictor: MemoryPredictor):
+        self._store = event_store
+        self._detector = anomaly_detector
+        self._predictor = predictor
+        self._running = False
+        self._thread: Optional[threading.Thread] = None
+        self._last_stats: dict = {}
+        self._last_analysis: dict = {}
+
+    # ── Lifecycle ──────────────────────────────────────────────────────────────
+
+    def start(self) -> None:
+        if self._running:
             return
-            
-        self.monitor_interval = interval
-        self.running = True
-        
-        self.monitor_thread = threading.Thread(target=self._monitoring_loop)
-        self.monitor_thread.daemon = True
-        self.monitor_thread.start()
-        
-        logger.info(f"Memory monitoring started with interval of {interval} seconds")
-        
-    def stop_monitoring(self):
-        """Stop the monitoring thread."""
-        self.running = False
-        if self.monitor_thread:
-            self.monitor_thread.join(timeout=5.0)
-        logger.info("Memory monitoring stopped")
-        
-    def _monitoring_loop(self):
-        """Main monitoring loop that runs in a separate thread."""
-        while self.running:
+        self._running = True
+        self._thread = threading.Thread(target=self._loop, daemon=True, name="MonitorAgent")
+        self._thread.start()
+        logger.info("MonitorAgent started (interval=%ds)", POLL_INTERVAL)
+
+    def stop(self) -> None:
+        self._running = False
+        logger.info("MonitorAgent stopped")
+
+    # ── Public API (used by web_interface.py) ──────────────────────────────────
+
+    def current_stats(self) -> dict:
+        return self._last_stats
+
+    def last_analysis(self) -> dict:
+        return self._last_analysis
+
+    def analyze_now(self) -> dict:
+        """Force an immediate analysis of current memory state."""
+        stats = get_memory_stats()
+        return self._analyze(stats)
+
+    # ── Internal ───────────────────────────────────────────────────────────────
+
+    def _loop(self) -> None:
+        while self._running:
             try:
-                memory_stats = get_memory_stats()
-                
-                analysis = self.analyze_memory_conditions(memory_stats)
-                
-                self._log_memory_event(memory_stats, analysis)
-                
-                if self.rag_pipeline:
-                    self.rag_pipeline.add_memory_event(memory_stats, analysis)
-                
-                if analysis.get('anomaly_detected', False):
-                    logger.warning(f"Memory anomaly detected: {analysis.get('anomaly_description')}")
-                
-                if memory_stats.get('used_percent', 0) > 90:
-                    time.sleep(max(10, self.monitor_interval // 3))
-                else:
-                    time.sleep(self.monitor_interval)
-                    
+                stats = get_memory_stats()
+                self._last_stats = stats
+                analysis = self._analyze(stats)
+                self._last_analysis = analysis
+                self._store.save_memory_event(stats, analysis)
             except Exception as e:
-                logger.error(f"Error in monitoring loop: {str(e)}")
-                time.sleep(self.monitor_interval)
-    
-    def analyze_memory_conditions(self, memory_stats):
-        """
-        Analyze memory conditions to detect anomalies and potential issues.
-        
-        Args:
-            memory_stats: Dictionary of memory statistics
-            
-        Returns:
-            Dictionary containing analysis results
-        """
-        try:
-            used_percent = memory_stats.get('used_percent', 0)
-            free_memory = memory_stats.get('free', 0)
-            
-            analysis = {
-                'timestamp': datetime.now().isoformat(),
-                'anomaly_detected': False,
-                'severity': 'normal',
-                'usage_level': 'normal',
-                'recommendation': None
-            }
-            
-            if used_percent > 90:
-                analysis['usage_level'] = 'critical'
-            elif used_percent > 80:
-                analysis['usage_level'] = 'high'
-            elif used_percent > 60:
-                analysis['usage_level'] = 'moderate'
-                
-            if used_percent > 90 and free_memory < 500 * 1024 * 1024:  # Less than 500MB free
-                analysis['anomaly_detected'] = True
-                analysis['severity'] = 'critical'
-                analysis['anomaly_description'] = 'Critical memory shortage detected'
-                analysis['recommendation'] = 'Immediate memory cleanup required'
-            elif used_percent > 80:
-                analysis['anomaly_detected'] = True
-                analysis['severity'] = 'high'
-                analysis['anomaly_description'] = 'High memory usage detected'
-                analysis['recommendation'] = 'Consider freeing unused memory'
-                
-            if self.llm_processor and self.rag_pipeline:
-                historical_context = self.rag_pipeline.get_relevant_memory_events(memory_stats)
-                enhanced_analysis = self._llm_enhanced_analysis(memory_stats, historical_context)
-                analysis.update(enhanced_analysis)
-                
-            return analysis
-            
-        except Exception as e:
-            logger.error(f"Error analyzing memory conditions: {str(e)}")
-            return {
-                'timestamp': datetime.now().isoformat(),
-                'anomaly_detected': False,
-                'severity': 'unknown',
-                'error': str(e)
-            }
-    
-    def _llm_enhanced_analysis(self, memory_stats, historical_context):
-        """
-        Enhance memory analysis using LLM.
-        
-        Args:
-            memory_stats: Current memory statistics
-            historical_context: Historical memory events for context
-            
-        Returns:
-            Enhanced analysis from the LLM
-        """
-        try:
-            prompt = f"""
-            You are a memory analysis expert. Analyze the following memory statistics and determine if there are any anomalies, potential issues, or patterns that should be addressed.
-            
-            Current Memory Statistics:
-            {json.dumps(memory_stats, indent=2)}
-            
-            Historical Context (previous memory events):
-            {json.dumps(historical_context, indent=2)}
-            
-            Provide a detailed analysis including:
-            1. Is there an anomaly? (true/false)
-            2. What is the severity? (normal/low/moderate/high/critical)
-            3. Detailed description of any issues detected
-            4. Specific recommendations for addressing the issues
-            5. Patterns observed in memory usage over time
-            
-            Format your response as a JSON object with the following fields:
-            - anomaly_detected (boolean)
-            - severity (string)
-            - anomaly_description (string, null if no anomaly)
-            - recommendations (list of strings)
-            - patterns_observed (list of strings)
-            """
-            
-            response = self.llm_processor.process(prompt)
-            
-            try:
-                json_str = response
-                if "```json" in response:
-                    json_str = response.split("```json")[1].split("```")[0].strip()
-                elif "```" in response:
-                    json_str = response.split("```")[1].strip()
-                    
-                enhanced_analysis = json.loads(json_str)
-                return enhanced_analysis
-            except json.JSONDecodeError:
-                logger.warning("Could not parse LLM response as JSON, using basic analysis")
-                return {}
-                
-        except Exception as e:
-            logger.error(f"Error in LLM-enhanced analysis: {str(e)}")
-            return {}
-    
-    def _log_memory_event(self, memory_stats, analysis):
-        """
-        Log memory event to a file for persistence.
-        
-        Args:
-            memory_stats: Memory statistics
-            analysis: Analysis results
-        """
-        try:
-            event = {
-                'timestamp': datetime.now().isoformat(),
-                'stats': memory_stats,
-                'analysis': analysis
-            }
-            
-            with open('data/memory_events.jsonl', 'a') as f:
-                f.write(json.dumps(event) + '\n')
-                
-        except Exception as e:
-            logger.error(f"Error logging memory event: {str(e)}")
-    
-    def is_memory_critical(self):
-        """
-        Check if the current memory condition is critical.
-        
-        Returns:
-            Boolean indicating if memory is in a critical state
-        """
-        memory_stats = get_memory_stats()
-        used_percent = memory_stats.get('used_percent', 0)
-        return used_percent > 90
+                logger.error("MonitorAgent loop error: %s", e)
+            time.sleep(POLL_INTERVAL)
+
+    def _analyze(self, stats: dict) -> dict:
+        used = stats.get("used_percent", 0)
+
+        # Feed into ML modules
+        self._detector.add_sample(used)
+        self._predictor.add_sample(used)
+
+        # Anomaly detection
+        anomaly = self._detector.detect(stats)
+
+        # Severity classification
+        severity = self._classify_severity(used, anomaly["is_anomaly"])
+
+        analysis = {
+            "timestamp": datetime.now().isoformat(),
+            "used_percent": used,
+            "severity": severity,
+            "anomaly": anomaly,
+            "status": self._status_message(used, severity),
+        }
+
+        if anomaly["is_anomaly"]:
+            logger.warning(
+                "ANOMALY detected | usage=%.1f%% | severity=%s | score=%.3f",
+                used, severity, anomaly["score"]
+            )
+
+        return analysis
+
+    @staticmethod
+    def _classify_severity(used_percent: float, is_anomaly: bool) -> str:
+        if used_percent >= 95 or (is_anomaly and used_percent >= 85):
+            return "critical"
+        if used_percent >= 85 or (is_anomaly and used_percent >= 70):
+            return "high"
+        if used_percent >= 70:
+            return "moderate"
+        return "low"
+
+    @staticmethod
+    def _status_message(used: float, severity: str) -> str:
+        return {
+            "critical": f"⛔ Critical — {used:.1f}% memory used. Immediate action required.",
+            "high":     f"⚠️  High — {used:.1f}% memory used. Healing recommended.",
+            "moderate": f"🟡 Moderate — {used:.1f}% memory used. Monitoring closely.",
+            "low":      f"✅ Normal — {used:.1f}% memory used.",
+        }.get(severity, "Unknown")

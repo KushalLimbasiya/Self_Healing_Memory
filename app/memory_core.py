@@ -24,6 +24,8 @@ def get_memory_stats() -> dict:
             "swap_total":   swap.total,
             "swap_used":    swap.used,
             "swap_percent": swap.percent,
+            "cpu_percent":  psutil.cpu_percent(interval=None),
+            "cpu_count":    psutil.cpu_count(logical=True),
             "timestamp":    datetime.now().isoformat(),
         }
     except Exception as e:
@@ -37,35 +39,77 @@ def get_memory_stats() -> dict:
         }
 
 
-def get_top_processes(limit: int = 5) -> list:
+def get_top_processes(limit: int = 8) -> list:
     """
-    Return top memory-consuming processes (name + memory %).
+    Return top memory-consuming processes with name, pid, memory MB and %.
     """
     try:
         procs = []
-        for p in psutil.process_iter(["pid", "name", "memory_percent"]):
+        for p in psutil.process_iter(["pid", "name", "memory_info", "memory_percent"]):
             try:
-                procs.append(p.info)
+                info = p.info
+                mem_mb = round(info["memory_info"].rss / (1024 * 1024), 1) if info.get("memory_info") else 0
+                procs.append({
+                    "pid":    info["pid"],
+                    "name":   info["name"],
+                    "mem_mb": mem_mb,
+                    "mem_pct": round(info.get("memory_percent", 0), 2),
+                })
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
-        procs.sort(key=lambda x: x.get("memory_percent", 0), reverse=True)
+        procs.sort(key=lambda x: x["mem_mb"], reverse=True)
         return procs[:limit]
     except Exception as e:
-        logger.error(f"Error getting top processes: {e}")
+        logger.error("Error getting top processes: %s", e)
         return []
 
 
 def release_memory_cache() -> bool:
     """
-    Release Python-managed memory via garbage collection.
-    On Linux also attempts to drop OS page cache (requires root).
+    Release as much memory as possible to the OS.
+
+    Strategy:
+      1. Full GC (all 3 generations)
+      2. Windows: SetProcessWorkingSetSize(-1,-1) + EmptyWorkingSet
+         Linux:   malloc_trim via ctypes + drop_caches (requires root)
     """
     try:
-        collected = gc.collect()
-        logger.info(f"gc.collect() freed {collected} objects")
+        import platform
+        import ctypes
+
+        # 1. Full garbage collection across all generations
+        collected = gc.collect(2)
+        logger.info("gc.collect(2): freed %d objects", collected)
+
+        sys_platform = platform.system()
+
+        if sys_platform == "Windows":
+            try:
+                kernel32 = ctypes.windll.kernel32
+                psapi    = ctypes.windll.psapi
+                pid      = kernel32.GetCurrentProcess()
+
+                # Trim working set of the current process
+                # SetProcessWorkingSetSize(-1, -1) tells Windows to trim to minimum
+                kernel32.SetProcessWorkingSetSize(pid, ctypes.c_size_t(-1), ctypes.c_size_t(-1))
+
+                # EmptyWorkingSet flushes unmodified pages from working set
+                psapi.EmptyWorkingSet(pid)
+
+                logger.info("Windows working set trimmed")
+            except Exception as win_err:
+                logger.debug("Windows trim failed (non-fatal): %s", win_err)
+
+        elif sys_platform == "Linux":
+            try:
+                ctypes.CDLL("libc.so.6").malloc_trim(0)
+                logger.info("Linux malloc_trim performed")
+            except Exception as lin_err:
+                logger.debug("Linux malloc_trim failed (non-fatal): %s", lin_err)
+
         return True
     except Exception as e:
-        logger.error(f"Error releasing memory cache: {e}")
+        logger.error("Error releasing memory cache: %s", e)
         return False
 
 

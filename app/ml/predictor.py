@@ -21,11 +21,24 @@ class MemoryPredictor:
     Outputs predicted_1h, predicted_6h, trend, confidence.
     """
 
-    def __init__(self, poll_interval_seconds: int = 30):
+    def __init__(self, poll_interval_seconds: int = 10, event_store=None):
         self._buffer: deque = deque(maxlen=BUFFER_MAX)
         self._timestamps: deque = deque(maxlen=BUFFER_MAX)
         self._lock = threading.Lock()
-        self._poll_interval = poll_interval_seconds  # seconds between readings
+        self._poll_interval = poll_interval_seconds
+        self._store = event_store
+
+        # Load persisted samples from DB so predictions resume after restart
+        if self._store:
+            try:
+                saved = self._store.load_ml_samples("predictor", limit=BUFFER_MAX)
+                for s in saved:
+                    self._buffer.append(s)
+                    self._timestamps.append(datetime.now().isoformat())
+                if saved:
+                    logger.info("MemoryPredictor: loaded %d samples from DB", len(saved))
+            except Exception as e:
+                logger.warning("MemoryPredictor: could not load samples from DB: %s", e)
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
@@ -34,6 +47,13 @@ class MemoryPredictor:
         with self._lock:
             self._buffer.append(used_percent)
             self._timestamps.append(ts or datetime.now().isoformat())
+
+        # Persist to DB
+        if self._store:
+            try:
+                self._store.save_ml_sample("predictor", used_percent)
+            except Exception:
+                pass
 
     def forecast(self) -> Dict:
         """
