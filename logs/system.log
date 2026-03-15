@@ -471,3 +471,4 @@
 2025-04-16 07:26:42,328 - app.rag_pipeline - DEBUG - Memory event added
 2025-04-16 07:27:11,855 - app.rag_pipeline - INFO - Loaded 100 memory events
 2025-04-16 07:27:11,857 - app.rag_pipeline - INFO - Loaded 12 predictions
+2026-03-15 15:22:10,546 [INFO] app.ml.healer_brain — HealerBrain initialised with scores: {'gc_collect': 0.6, 'clear_cache': 0.7, 'log_alert': 0.3, 'reduce_interval': 0.4}
